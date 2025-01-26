@@ -1,238 +1,406 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Responsive 3D DVD Screensaver</title>
+  <meta charset="UTF-8">
+  <title>Bouncing 3D Model</title>
   <style>
-    /* Basic reset + black background */
+    /* Full-window reset & subtle gradient background */
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      background: burlywood;
-      overflow: hidden; /* Remove scrollbars on mobile/desktop */
+      background: linear-gradient(135deg, #0c0c0c 0%, #202020 100%);
+      overflow: hidden;
     }
-    /* The container will fill the entire page */
     #container {
-      position: relative;
       width: 100%;
       height: 100%;
+      position: relative;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
+                   'Helvetica Neue', Arial, sans-serif;
+      color: #fff;
     }
     .overlay {
       position: absolute;
-      top: 10px;
-      left: 10px;
+      top: 12px;
+      left: 12px;
+      font-size: 14px;
+      opacity: 0.9;
+      z-index: 2;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+    /* Fullscreen overlay for choosing Audio style */
+    #audioChoiceOverlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%; 
+      height: 100%;
+      display: flex;
+      align-items: center; 
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.7);
       color: #fff;
-      font-family: sans-serif;
-      z-index: 999;
+      font-size: 1.2em;
+      text-align: center;
+      z-index: 999999;
+    }
+    #audioChoiceOverlay .panel {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      padding: 24px 32px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 8px;
+    }
+    #audioChoiceOverlay button {
+      cursor: pointer;
+      font-size: 14px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 4px;
+      background: rgba(0,0,0,0.3);
+      color: #fff;
+      transition: background 0.2s ease;
+    }
+    #audioChoiceOverlay button:hover {
+      background: rgba(0,0,0,0.4);
+    }
+    /* Bottom-right controls panel */
+    #controlsOverlay {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(0, 0, 0, 0.35);
+      padding: 10px;
+      border-radius: 6px;
+      z-index: 9999;
+    }
+    /* Mute/Unmute button with volume icon */
+    #muteBtn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+      font-size: 14px;
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    #muteBtn:hover {
+      background: rgba(255,255,255,0.2);
+    }
+    /* Speed slider label */
+    .sliderContainer {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .sliderContainer label {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+    /* Speed slider style */
+    #speedSlider {
+      width: 100px;
+      appearance: none;
+      height: 4px;
+      background: #555;
+      border-radius: 2px;
+      outline: none;
+      transition: background 0.15s ease;
+      cursor: pointer;
+    }
+    #speedSlider:hover {
+      background: #666;
+    }
+    #speedSlider::-webkit-slider-thumb {
+      appearance: none;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #333;
+      cursor: pointer;
+    }
+    #speedSlider::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: #fff;
+      border: 2px solid #333;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
-
 <div id="container">
-  <div class="overlay">3D DVD Screensaver Demo</div>
+  <!-- Fullscreen overlay to pick "Action" or "Calm" or "No audio" -->
+  <div id="audioChoiceOverlay">
+    <div class="panel">
+      <p style="margin:0; font-size:1.1em;">
+        Choose your background music:
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button id="actionBtn">Action Music</button>
+        <button id="calmBtn">Calm Music</button>
+        <button id="noAudioBtn">No Audio</button>
+      </div>
+      <p style="font-size:0.9em; opacity:0.7; margin-top:8px;">
+        (Recommended with audio)
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom-right controls: Mute + Speed slider -->
+  <div id="controlsOverlay">
+    <button id="muteBtn">
+      <span id="muteIcon" style="font-size:16px;">🔊</span>
+      <span id="muteLabel">Mute</span>
+    </button>
+    <div class="sliderContainer">
+      <label for="speedSlider">Speed:</label>
+      <input id="speedSlider" type="range" min="0.01" max="0.5" step="0.01" value="0.18" />
+    </div>
+  </div>
 </div>
 
 <!-- Three.js (r125) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
 
-<!-- OrbitControls (r125) -->
-<script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/controls/OrbitControls.js"></script>
-
 <!-- OBJLoader (r125) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/loaders/OBJLoader.js"></script>
 
 <script>
-let scene, camera, renderer, controls;
-let model;
+let scene, camera, renderer, model;
 
-// We'll define the 'halfHeight' for the vertical camera extent (±halfHeight).
-// The horizontal extent is computed based on the aspect ratio = width / height.
-const halfHeight = 30;
+// Orthographic camera base half-size
+const BASE_HALF_HEIGHT = 30;
+const MODEL_RADIUS = 7;
 
-// The model is about 14 units wide, so let's assume half of that (~7) to keep it from clipping.
-let modelRadius = 7;
-
-// The bounceBoxX, bounceBoxY get updated on each resize to define boundaries.
-let bounceBoxX, bounceBoxY;
-
-// Movement speed for the hamster
+// Movement vector & spin direction
 let velocity = new THREE.Vector2(0.15, 0.1);
-
-// Spin direction (on each bounce, we randomize it)
 let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
+// Sounds
+const bounceSounds = ["fall1.wav", "fall2.wav", "fall3.wav"];
+let currentBgAudio = null;
+let muted = false;
+
+/* Audio Choice Overlay */
+document.getElementById("actionBtn").addEventListener("click", () => {
+  pickBackground("bg_music2.wav");
+});
+document.getElementById("calmBtn").addEventListener("click", () => {
+  pickBackground("BG_loop.wav");
+});
+document.getElementById("noAudioBtn").addEventListener("click", () => {
+  muted = true;
+  updateMuteUI();
+  hideAudioChoiceOverlay();
+});
+
+function pickBackground(bgFile) {
+  currentBgAudio = new Audio(bgFile);
+  currentBgAudio.loop = true;
+  currentBgAudio.volume = 0.5;
+  currentBgAudio.muted = muted;
+
+  currentBgAudio.play().catch(err => {
+    console.warn("Audio play blocked:", err);
+  });
+  hideAudioChoiceOverlay();
+}
+
+function hideAudioChoiceOverlay() {
+  const overlay = document.getElementById("audioChoiceOverlay");
+  if (overlay) overlay.style.display = "none";
+}
+
+/* Mute/unmute */
+document.getElementById("muteBtn").addEventListener("click", () => {
+  muted = !muted;
+  if (currentBgAudio) {
+    currentBgAudio.muted = muted;
+  }
+  updateMuteUI();
+});
+
+function updateMuteUI() {
+  const muteIcon = document.getElementById("muteIcon");
+  const muteLabel = document.getElementById("muteLabel");
+  if (muted) {
+    muteIcon.textContent = "🔇";
+    muteLabel.textContent = "Unmute";
+  } else {
+    muteIcon.textContent = "🔊";
+    muteLabel.textContent = "Mute";
+  }
+}
+
+/* Speed Slider */
+document.getElementById("speedSlider").addEventListener("input", (e) => {
+  const newSpeed = parseFloat(e.target.value);
+  setSpeed(newSpeed);
+});
+
+function setSpeed(newSpeed) {
+  const dir = velocity.clone().normalize();
+  velocity.copy(dir.multiplyScalar(newSpeed));
+}
+
+/* Three.js Init */
 init();
 animate();
 
 function init() {
   scene = new THREE.Scene();
 
-  // First, figure out the initial size
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  const aspect = width / height;
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const aspect = w / h;
 
-  // We'll compute halfWidth so that we keep a ±halfHeight in Y, 
-  // and in X it becomes ±(halfHeight * aspect).
-  const halfWidth = halfHeight * aspect;
-
-  // Orthographic camera from (-halfWidth, halfWidth, halfHeight, -halfHeight)
+  // Fixed Orthographic Camera
   camera = new THREE.OrthographicCamera(
-    -halfWidth,  // left
-     halfWidth,  // right
-     halfHeight, // top
-    -halfHeight, // bottom
-    1,           // near
-    1000         // far
+    -BASE_HALF_HEIGHT * aspect,
+     BASE_HALF_HEIGHT * aspect,
+     BASE_HALF_HEIGHT,
+    -BASE_HALF_HEIGHT,
+    1,
+    1000
   );
-  // Position the camera so we see the model from "above and in front"
   camera.position.set(0, 50, 100);
   camera.lookAt(0, 0, 0);
 
-  // Create renderer and fit it to the current window size
   renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(width, height);
-  document.getElementById('container').appendChild(renderer.domElement);
+  renderer.setSize(w, h);
+  document.getElementById("container").appendChild(renderer.domElement);
 
-  // Bouncing boundaries:
-  // We subtract modelRadius so the hamster doesn't pass out of view or get clipped
-  bounceBoxX = halfWidth - modelRadius;
-  bounceBoxY = halfHeight - modelRadius;
-
-  // Load the Hamster OBJ
+  // Load the 3D .obj
   const loader = new THREE.OBJLoader();
   loader.load(
-    'Hamster_GGJ_021.obj',
-    function (obj) {
+    "Hamster_GGJ_021.obj",
+    (obj) => {
       model = obj;
-      // Keep scale = 1 so the model is ~14×13×7 in size
-      model.scale.set(1, 1, 1);
+      // Rotate the model 180° around Y so the "front" faces the camera
+      model.rotation.y = Math.PI;
 
-      // If the hamster is upside down or sideways, tweak these rotations:
-      model.rotation.set(0, 0, 0);
-
-      // Give a basic white Phong material
-      model.traverse(function(child) {
+      // Basic white material
+      model.traverse(child => {
         if (child.isMesh) {
           child.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
         }
       });
       scene.add(model);
     },
-    // Progress callback
-    function (xhr) {
-      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
-    },
-    // Error callback
-    function (err) {
-      console.error('Error loading OBJ model:', err);
-    }
+    (xhr) => console.log(((xhr.loaded / xhr.total) * 100).toFixed(1) + "% loaded"),
+    (err) => console.error("Error loading OBJ:", err)
   );
 
   // Lights
-  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
-  scene.add(ambientLight);
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-  directionalLight.position.set(1, 2, 3);
-  scene.add(directionalLight);
+  const ambient = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(ambient);
+  const directional = new THREE.DirectionalLight(0xffffff, 0.8);
+  directional.position.set(1, 2, 3);
+  scene.add(directional);
 
-  // OrbitControls (optional)
-  controls = new THREE.OrbitControls(camera, renderer.domElement);
-  controls.enableDamping = true;
-  controls.dampingFactor = 0.05;
-
-  // Listen for window resizing on any device
-  window.addEventListener('resize', onWindowResize, false);
+  window.addEventListener("resize", onWindowResize);
 }
 
 function onWindowResize() {
-  // 1) Update renderer
-  const width = window.innerWidth;
-  const height = window.innerHeight;
-  renderer.setSize(width, height);
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  renderer.setSize(w, h);
 
-  // 2) Update camera aspect/bounds
-  const aspect = width / height;
-  const halfWidth = halfHeight * aspect;
-
-  camera.left = -halfWidth;
-  camera.right =  halfWidth;
-  camera.top = halfHeight;
-  camera.bottom = -halfHeight;
+  const aspect = w / h;
+  camera.left   = -BASE_HALF_HEIGHT * aspect;
+  camera.right  =  BASE_HALF_HEIGHT * aspect;
+  camera.top    =  BASE_HALF_HEIGHT;
+  camera.bottom = -BASE_HALF_HEIGHT;
   camera.updateProjectionMatrix();
-
-  // 3) Update our bounce boundary
-  bounceBoxX = halfWidth - modelRadius;
-  bounceBoxY = halfHeight - modelRadius;
 }
 
 function animate() {
   requestAnimationFrame(animate);
 
   if (model) {
-    // Move the hamster
+    // Move
     model.position.x += velocity.x;
     model.position.y += velocity.y;
 
-    // DVD bounce collisions in X
-    if (model.position.x > bounceBoxX) {
-      model.position.x = bounceBoxX;
+    // Check boundaries
+    const { halfW, halfH } = getCurrentBounceBox();
+    if (model.position.x > halfW) {
+      model.position.x = halfW;
       velocity.x *= -1;
-      randomizeColorAndSpin();
-    } else if (model.position.x < -bounceBoxX) {
-      model.position.x = -bounceBoxX;
+      onBounce();
+    } else if (model.position.x < -halfW) {
+      model.position.x = -halfW;
       velocity.x *= -1;
-      randomizeColorAndSpin();
+      onBounce();
+    }
+    if (model.position.y > halfH) {
+      model.position.y = halfH;
+      velocity.y *= -1;
+      onBounce();
+    } else if (model.position.y < -halfH) {
+      model.position.y = -halfH;
+      velocity.y *= -1;
+      onBounce();
     }
 
-    // DVD bounce collisions in Y
-    if (model.position.y > bounceBoxY) {
-      model.position.y = bounceBoxY;
-      velocity.y *= -1;
-      randomizeColorAndSpin();
-    } else if (model.position.y < -bounceBoxY) {
-      model.position.y = -bounceBoxY;
-      velocity.y *= -1;
-      randomizeColorAndSpin();
-    }
-
-    // Spin on x, y, z axes
+    // Spin
     model.rotation.x += spinDirection.x;
     model.rotation.y += spinDirection.y;
     model.rotation.z += spinDirection.z;
   }
 
-  // If OrbitControls is used
-  controls.update();
   renderer.render(scene, camera);
 }
 
-/** 
- * On every bounce, we change the color randomly
- * and change spin direction & speed to a new random vector
- */
-function randomizeColorAndSpin() {
+function getCurrentBounceBox() {
+  const aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
+  const halfH = (BASE_HALF_HEIGHT / camera.zoom) - MODEL_RADIUS;
+  const halfW = halfH * aspect;
+  return { halfW, halfH };
+}
+
+function onBounce() {
   if (!model) return;
 
-  // Randomize color
-  const randomColor = Math.floor(Math.random() * 0xffffff);
+  // Random color
+  const randColor = Math.floor(Math.random() * 0xffffff);
   model.traverse(child => {
     if (child.isMesh && child.material) {
-      child.material.color.setHex(randomColor);
+      child.material.color.setHex(randColor);
     }
   });
 
-  // Randomize spin direction
-  // e.g., in the range -0.03 .. +0.03
+  // Random spin direction
   const maxSpin = 0.03;
   spinDirection.set(
-    (Math.random() * (maxSpin * 2)) - maxSpin,
-    (Math.random() * (maxSpin * 2)) - maxSpin,
-    (Math.random() * (maxSpin * 2)) - maxSpin
+    (Math.random() * maxSpin * 2) - maxSpin,
+    (Math.random() * maxSpin * 2) - maxSpin,
+    (Math.random() * maxSpin * 2) - maxSpin
   );
+
+  // Random bounce sound
+  if (!muted) {
+    const index = Math.floor(Math.random() * bounceSounds.length);
+    const audio = new Audio(bounceSounds[index]);
+    audio.play().catch(err => {
+      console.warn("Bounce sound blocked:", err);
+    });
+  }
 }
 </script>
 </body>
