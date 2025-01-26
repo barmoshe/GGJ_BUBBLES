@@ -153,6 +153,7 @@
       <div style="display:flex; gap:10px; justify-content:center;">
         <button id="actionBtn">Action Music</button>
         <button id="calmBtn">Calm Music</button>
+        <button id="scaryBtn">Scary Music</button>
         <button id="noAudioBtn">No Audio</button>
       </div>
       <p style="font-size:0.9em; opacity:0.7; margin-top:8px;">
@@ -199,6 +200,9 @@ let muted = false;
 /* Audio Choice Overlay */
 document.getElementById("actionBtn").addEventListener("click", () => {
   pickBackground("bg_music2.wav");
+});
+document.getElementById("scaryBtn").addEventListener("click", () => {
+  pickBackground("cave_BG_with_insects_short.wav");
 });
 document.getElementById("calmBtn").addEventListener("click", () => {
   pickBackground("BG_loop.wav");
