@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AshaHi ScreenSaver</title>
+  <title>AshaHi ScreenSaver (WebAudio SFX + BG Music)</title>
   <style>
     /* Full-window reset & subtle gradient background */
     html, body {
@@ -21,19 +21,6 @@
                    'Helvetica Neue', Arial, sans-serif;
       color: #fff;
     }
-    /* If you want an optional overlay top-left, you can keep or remove 
-    .overlay {
-      position: absolute;
-      top: 12px;
-      left: 12px;
-      font-size: 14px;
-      opacity: 0.9;
-      z-index: 2;
-      background: rgba(0, 0, 0, 0.35);
-      padding: 8px 12px;
-      border-radius: 6px;
-    } */
-
     /* Fullscreen overlay for choosing Audio style */
     #audioChoiceOverlay {
       position: absolute;
@@ -57,7 +44,6 @@
       padding: 24px 32px;
       background: rgba(255,255,255,0.1);
       border-radius: 8px;
-      /* give a default width so it's narrower on desktop */
       width: 400px;
       max-width: 90%;
     }
@@ -88,7 +74,7 @@
       border-radius: 6px;
       z-index: 9999;
     }
-    /* Mute/Unmute button with volume icon */
+    /* Mute/Unmute button */
     #muteBtn {
       display: inline-flex;
       align-items: center;
@@ -147,14 +133,11 @@
       cursor: pointer;
     }
 
-    /* =========================================================
-       RESPONSIVE (MOBILE) STYLES
-       ========================================================= */
+    /* Responsive (mobile) styles */
     @media screen and (max-width: 600px) {
-      /* Make the panel & buttons bigger for mobile */
       #audioChoiceOverlay .panel {
         width: 80%;
-        max-width: 330px; /* narrower on small screens */
+        max-width: 330px;
       }
       #audioChoiceOverlay button {
         padding: 12px 20px;
@@ -164,7 +147,6 @@
         font-size: 1.0em;
       }
 
-      /* Stack the bottom controls vertically */
       #controlsOverlay {
         flex-direction: column;
         right: 10px;
@@ -188,7 +170,7 @@
 </head>
 <body>
 <div id="container">
-  <!-- Fullscreen overlay to pick music -->
+  <!-- Fullscreen overlay to pick "Action" or "Calm" or "Scary" or "No audio" -->
   <div id="audioChoiceOverlay">
     <div class="panel">
       <p style="margin:0; font-size:1.1em;">Choose your background music:</p>
@@ -224,8 +206,12 @@
 <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/loaders/OBJLoader.js"></script>
 
 <script>
+/* ======================================================
+   1) Global variables / config
+   ====================================================== */
 let scene, camera, renderer, model;
 
+// Orthographic camera base half-size
 const BASE_HALF_HEIGHT = 30;
 const MODEL_RADIUS = 7;
 
@@ -233,45 +219,104 @@ const MODEL_RADIUS = 7;
 let velocity = new THREE.Vector2(0.15, 0.1);
 let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
-// Bounce SFX
-const bounceSounds = ["fall1.wav", "fall2.wav", "fall3.wav"];
+// The background track is an HTMLAudio element
 let currentBgAudio = null;
 let muted = false;
 
-/* Music Choice: Action / Calm / Scary / No Audio */
+// Web Audio for bounce SFX
+let audioCtx = null; 
+let bounceBuffers = []; // store decoded AudioBuffers here
+// The list of bounce effect files
+const bounceSounds = ["fall1.wav", "fall2.wav", "fall3.wav"];
+
+/* ======================================================
+   2) Audio Choice Overlay & Listeners
+   ====================================================== */
 document.getElementById("actionBtn").addEventListener("click", () => {
-  pickBackground("bg_music2.wav");
+  pickBackground("bg_music2.wav"); // "Action"
 });
 document.getElementById("calmBtn").addEventListener("click", () => {
-  pickBackground("BG_loop.wav");
+  pickBackground("BG_loop.wav");   // "Calm"
 });
 document.getElementById("scaryBtn").addEventListener("click", () => {
-  pickBackground("33.wav");
+  pickBackground("33.wav");        // "Scary"
 });
 document.getElementById("noAudioBtn").addEventListener("click", () => {
+  // user chooses no audio => keep everything muted
   muted = true;
   updateMuteUI();
   hideAudioChoiceOverlay();
 });
 
+/**
+ * Called if user chooses a background track (Action/Calm/Scary).
+ * We create the background track via HTMLAudio, 
+ * and also init the AudioContext for bounce SFX.
+ */
 function pickBackground(bgFile) {
+  // 1) Create the background track
   currentBgAudio = new Audio(bgFile);
   currentBgAudio.loop = true;
   currentBgAudio.volume = 0.5;
   currentBgAudio.muted = muted;
-
+  currentBgAudio.setAttribute('playsinline',''); // iOS inline
   currentBgAudio.play().catch(err => {
     console.warn("Audio play blocked:", err);
   });
+
+  // 2) Initialize Web Audio context for bounce SFX
+  initBounceAudio();
+
   hideAudioChoiceOverlay();
 }
 
+/** Hide the initial overlay */
 function hideAudioChoiceOverlay() {
   const overlay = document.getElementById("audioChoiceOverlay");
   if (overlay) overlay.style.display = "none";
 }
 
-/* Mute/unmute */
+/* ======================================================
+   3) Web Audio: bounce sounds
+   ====================================================== */
+async function initBounceAudio() {
+  // Create or resume AudioContext on user gesture
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+  // Preload & decode each bounce .wav
+  bounceBuffers = [];
+  for (const url of bounceSounds) {
+    try {
+      const resp = await fetch(url);
+      const arrayBuf = await resp.arrayBuffer();
+      const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
+      bounceBuffers.push(audioBuf);
+    } catch(e) {
+      console.warn("Error decoding SFX:", url, e);
+    }
+  }
+}
+
+/** Called on each bounce to play a short buffer. */
+function playBounceSound() {
+  if (!audioCtx || bounceBuffers.length === 0) return;
+  if (muted) return; // if muted, skip
+
+  // pick random buffer
+  const index = Math.floor(Math.random() * bounceBuffers.length);
+  const buf = bounceBuffers[index];
+  if (!buf) return;
+
+  const source = audioCtx.createBufferSource();
+  source.buffer = buf;
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
+/* ======================================================
+   4) Mute / Unmute
+   ====================================================== */
 document.getElementById("muteBtn").addEventListener("click", () => {
   muted = !muted;
   if (currentBgAudio) {
@@ -292,7 +337,9 @@ function updateMuteUI() {
   }
 }
 
-/* Speed Slider */
+/* ======================================================
+   5) Speed Slider
+   ====================================================== */
 document.getElementById("speedSlider").addEventListener("input", (e) => {
   const newSpeed = parseFloat(e.target.value);
   setSpeed(newSpeed);
@@ -302,17 +349,20 @@ function setSpeed(newSpeed) {
   velocity.copy(dir.multiplyScalar(newSpeed));
 }
 
-/* Three.js: Scene & Render */
-init();
+/* ======================================================
+   6) Three.js Scene
+   ====================================================== */
+initThree();
 animate();
 
-function init() {
+function initThree() {
   scene = new THREE.Scene();
 
   const w = window.innerWidth;
   const h = window.innerHeight;
   const aspect = w / h;
 
+  // Orthographic camera
   camera = new THREE.OrthographicCamera(
     -BASE_HALF_HEIGHT * aspect,
      BASE_HALF_HEIGHT * aspect,
@@ -321,6 +371,7 @@ function init() {
     1,
     1000
   );
+  // position so model is visible from "front"
   camera.position.set(0, 50, 100);
   camera.lookAt(0, 0, 0);
 
@@ -334,10 +385,9 @@ function init() {
     "Hamster_GGJ_021.obj",
     (obj) => {
       model = obj;
-      // Rotate 180° to show "front" if needed
+      // rotate 180° so "front" faces camera
       model.rotation.y = Math.PI;
-
-      // White material
+      // white material
       model.traverse(child => {
         if (child.isMesh) {
           child.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -372,15 +422,16 @@ function onWindowResize() {
   camera.updateProjectionMatrix();
 }
 
+/* Main animation loop */
 function animate() {
   requestAnimationFrame(animate);
 
   if (model) {
-    // Move
+    // move the model
     model.position.x += velocity.x;
     model.position.y += velocity.y;
 
-    // Boundaries
+    // check collisions (DVD bounce logic)
     const { halfW, halfH } = getCurrentBounceBox();
     if (model.position.x > halfW) {
       model.position.x = halfW;
@@ -401,7 +452,7 @@ function animate() {
       onBounce();
     }
 
-    // Spin
+    // spin
     model.rotation.x += spinDirection.x;
     model.rotation.y += spinDirection.y;
     model.rotation.z += spinDirection.z;
@@ -410,6 +461,7 @@ function animate() {
   renderer.render(scene, camera);
 }
 
+/* calculates bounding box minus the model radius */
 function getCurrentBounceBox() {
   const aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
   const halfH = (BASE_HALF_HEIGHT / camera.zoom) - MODEL_RADIUS;
@@ -417,10 +469,11 @@ function getCurrentBounceBox() {
   return { halfW, halfH };
 }
 
+/* Called when the model hits a boundary */
 function onBounce() {
   if (!model) return;
 
-  // Random color
+  // random color
   const randColor = Math.floor(Math.random() * 0xffffff);
   model.traverse(child => {
     if (child.isMesh && child.material) {
@@ -428,7 +481,7 @@ function onBounce() {
     }
   });
 
-  // Random spin
+  // random spin
   const maxSpin = 0.03;
   spinDirection.set(
     (Math.random() * maxSpin * 2) - maxSpin,
@@ -436,14 +489,8 @@ function onBounce() {
     (Math.random() * maxSpin * 2) - maxSpin
   );
 
-  // Random bounce sound if not muted
-  if (!muted) {
-    const index = Math.floor(Math.random() * bounceSounds.length);
-    const audio = new Audio(bounceSounds[index]);
-    audio.play().catch(err => {
-      console.warn("Bounce sound blocked:", err);
-    });
-  }
+  // play bounce SFX via Web Audio
+  playBounceSound();
 }
 </script>
 </body>
