@@ -21,6 +21,7 @@
                    'Helvetica Neue', Arial, sans-serif;
       color: #fff;
     }
+    /* If you want an optional overlay top-left, you can keep or remove 
     .overlay {
       position: absolute;
       top: 12px;
@@ -31,7 +32,8 @@
       background: rgba(0, 0, 0, 0.35);
       padding: 8px 12px;
       border-radius: 6px;
-    }
+    } */
+
     /* Fullscreen overlay for choosing Audio style */
     #audioChoiceOverlay {
       position: absolute;
@@ -55,6 +57,9 @@
       padding: 24px 32px;
       background: rgba(255,255,255,0.1);
       border-radius: 8px;
+      /* give a default width so it's narrower on desktop */
+      width: 400px;
+      max-width: 90%;
     }
     #audioChoiceOverlay button {
       cursor: pointer;
@@ -69,6 +74,7 @@
     #audioChoiceOverlay button:hover {
       background: rgba(0,0,0,0.4);
     }
+
     /* Bottom-right controls panel */
     #controlsOverlay {
       position: absolute;
@@ -140,17 +146,53 @@
       border: 2px solid #333;
       cursor: pointer;
     }
+
+    /* =========================================================
+       RESPONSIVE (MOBILE) STYLES
+       ========================================================= */
+    @media screen and (max-width: 600px) {
+      /* Make the panel & buttons bigger for mobile */
+      #audioChoiceOverlay .panel {
+        width: 80%;
+        max-width: 330px; /* narrower on small screens */
+      }
+      #audioChoiceOverlay button {
+        padding: 12px 20px;
+        font-size: 16px;
+      }
+      #audioChoiceOverlay p {
+        font-size: 1.0em;
+      }
+
+      /* Stack the bottom controls vertically */
+      #controlsOverlay {
+        flex-direction: column;
+        right: 10px;
+        bottom: 10px;
+        gap: 10px;
+        padding: 8px;
+      }
+      #muteBtn {
+        width: 100%;
+        justify-content: center;
+      }
+      .sliderContainer {
+        width: 100%;
+        justify-content: space-between;
+      }
+      #speedSlider {
+        flex: 1;
+      }
+    }
   </style>
 </head>
 <body>
 <div id="container">
-  <!-- Fullscreen overlay to pick "Action" or "Calm" or "No audio" -->
+  <!-- Fullscreen overlay to pick music -->
   <div id="audioChoiceOverlay">
     <div class="panel">
-      <p style="margin:0; font-size:1.1em;">
-        Choose your background music:
-      </p>
-      <div style="display:flex; gap:10px; justify-content:center;">
+      <p style="margin:0; font-size:1.1em;">Choose your background music:</p>
+      <div style="display:flex; gap:10px; justify-content:center; flex-wrap: wrap;">
         <button id="actionBtn">Action Music</button>
         <button id="calmBtn">Calm Music</button>
         <button id="scaryBtn">Scary Music</button>
@@ -184,28 +226,27 @@
 <script>
 let scene, camera, renderer, model;
 
-// Orthographic camera base half-size
 const BASE_HALF_HEIGHT = 30;
 const MODEL_RADIUS = 7;
 
-// Movement vector & spin direction
+// Movement & spin
 let velocity = new THREE.Vector2(0.15, 0.1);
 let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
-// Sounds
+// Bounce SFX
 const bounceSounds = ["fall1.wav", "fall2.wav", "fall3.wav"];
 let currentBgAudio = null;
 let muted = false;
 
-/* Audio Choice Overlay */
+/* Music Choice: Action / Calm / Scary / No Audio */
 document.getElementById("actionBtn").addEventListener("click", () => {
   pickBackground("bg_music2.wav");
 });
-document.getElementById("scaryBtn").addEventListener("click", () => {
-  pickBackground("33.wav");
-});
 document.getElementById("calmBtn").addEventListener("click", () => {
   pickBackground("BG_loop.wav");
+});
+document.getElementById("scaryBtn").addEventListener("click", () => {
+  pickBackground("33.wav");
 });
 document.getElementById("noAudioBtn").addEventListener("click", () => {
   muted = true;
@@ -256,13 +297,12 @@ document.getElementById("speedSlider").addEventListener("input", (e) => {
   const newSpeed = parseFloat(e.target.value);
   setSpeed(newSpeed);
 });
-
 function setSpeed(newSpeed) {
   const dir = velocity.clone().normalize();
   velocity.copy(dir.multiplyScalar(newSpeed));
 }
 
-/* Three.js Init */
+/* Three.js: Scene & Render */
 init();
 animate();
 
@@ -273,7 +313,6 @@ function init() {
   const h = window.innerHeight;
   const aspect = w / h;
 
-  // Fixed Orthographic Camera
   camera = new THREE.OrthographicCamera(
     -BASE_HALF_HEIGHT * aspect,
      BASE_HALF_HEIGHT * aspect,
@@ -289,16 +328,16 @@ function init() {
   renderer.setSize(w, h);
   document.getElementById("container").appendChild(renderer.domElement);
 
-  // Load the 3D .obj
+  // Load the .obj model
   const loader = new THREE.OBJLoader();
   loader.load(
     "Hamster_GGJ_021.obj",
     (obj) => {
       model = obj;
-      // Rotate the model 180° around Y so the "front" faces the camera
+      // Rotate 180° to show "front" if needed
       model.rotation.y = Math.PI;
 
-      // Basic white material
+      // White material
       model.traverse(child => {
         if (child.isMesh) {
           child.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -341,7 +380,7 @@ function animate() {
     model.position.x += velocity.x;
     model.position.y += velocity.y;
 
-    // Check boundaries
+    // Boundaries
     const { halfW, halfH } = getCurrentBounceBox();
     if (model.position.x > halfW) {
       model.position.x = halfW;
@@ -389,7 +428,7 @@ function onBounce() {
     }
   });
 
-  // Random spin direction
+  // Random spin
   const maxSpin = 0.03;
   spinDirection.set(
     (Math.random() * maxSpin * 2) - maxSpin,
@@ -397,7 +436,7 @@ function onBounce() {
     (Math.random() * maxSpin * 2) - maxSpin
   );
 
-  // Random bounce sound
+  // Random bounce sound if not muted
   if (!muted) {
     const index = Math.floor(Math.random() * bounceSounds.length);
     const audio = new Audio(bounceSounds[index]);
