@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Responsive 3D DVD Screensaver</title>
+  <style>
+    /* Basic reset + black background */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background: burlywood;
+      overflow: hidden; /* Remove scrollbars on mobile/desktop */
+    }
+    /* The container will fill the entire page */
+    #container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+    }
+    .overlay {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: #fff;
+      font-family: sans-serif;
+      z-index: 999;
+    }
+  </style>
+</head>
+<body>
+
+<div id="container">
+  <div class="overlay">3D DVD Screensaver Demo</div>
+</div>
+
+<!-- Three.js (r125) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
+
+<!-- OrbitControls (r125) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/controls/OrbitControls.js"></script>
+
+<!-- OBJLoader (r125) -->
+<script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/loaders/OBJLoader.js"></script>
+
+<script>
+let scene, camera, renderer, controls;
+let model;
+
+// We'll define the 'halfHeight' for the vertical camera extent (±halfHeight).
+// The horizontal extent is computed based on the aspect ratio = width / height.
+const halfHeight = 30;
+
+// The model is about 14 units wide, so let's assume half of that (~7) to keep it from clipping.
+let modelRadius = 7;
+
+// The bounceBoxX, bounceBoxY get updated on each resize to define boundaries.
+let bounceBoxX, bounceBoxY;
+
+// Movement speed for the hamster
+let velocity = new THREE.Vector2(0.15, 0.1);
+
+// Spin direction (on each bounce, we randomize it)
+let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
+
+init();
+animate();
+
+function init() {
+  scene = new THREE.Scene();
+
+  // First, figure out the initial size
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  const aspect = width / height;
+
+  // We'll compute halfWidth so that we keep a ±halfHeight in Y, 
+  // and in X it becomes ±(halfHeight * aspect).
+  const halfWidth = halfHeight * aspect;
+
+  // Orthographic camera from (-halfWidth, halfWidth, halfHeight, -halfHeight)
+  camera = new THREE.OrthographicCamera(
+    -halfWidth,  // left
+     halfWidth,  // right
+     halfHeight, // top
+    -halfHeight, // bottom
+    1,           // near
+    1000         // far
+  );
+  // Position the camera so we see the model from "above and in front"
+  camera.position.set(0, 50, 100);
+  camera.lookAt(0, 0, 0);
+
+  // Create renderer and fit it to the current window size
+  renderer = new THREE.WebGLRenderer({ antialias: true });
+  renderer.setSize(width, height);
+  document.getElementById('container').appendChild(renderer.domElement);
+
+  // Bouncing boundaries:
+  // We subtract modelRadius so the hamster doesn't pass out of view or get clipped
+  bounceBoxX = halfWidth - modelRadius;
+  bounceBoxY = halfHeight - modelRadius;
+
+  // Load the Hamster OBJ
+  const loader = new THREE.OBJLoader();
+  loader.load(
+    'Hamster_GGJ_021.obj',
+    function (obj) {
+      model = obj;
+      // Keep scale = 1 so the model is ~14×13×7 in size
+      model.scale.set(1, 1, 1);
+
+      // If the hamster is upside down or sideways, tweak these rotations:
+      model.rotation.set(0, 0, 0);
+
+      // Give a basic white Phong material
+      model.traverse(function(child) {
+        if (child.isMesh) {
+          child.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
+        }
+      });
+      scene.add(model);
+    },
+    // Progress callback
+    function (xhr) {
+      console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+    },
+    // Error callback
+    function (err) {
+      console.error('Error loading OBJ model:', err);
+    }
+  );
+
+  // Lights
+  const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
+  scene.add(ambientLight);
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  directionalLight.position.set(1, 2, 3);
+  scene.add(directionalLight);
+
+  // OrbitControls (optional)
+  controls = new THREE.OrbitControls(camera, renderer.domElement);
+  controls.enableDamping = true;
+  controls.dampingFactor = 0.05;
+
+  // Listen for window resizing on any device
+  window.addEventListener('resize', onWindowResize, false);
+}
+
+function onWindowResize() {
+  // 1) Update renderer
+  const width = window.innerWidth;
+  const height = window.innerHeight;
+  renderer.setSize(width, height);
+
+  // 2) Update camera aspect/bounds
+  const aspect = width / height;
+  const halfWidth = halfHeight * aspect;
+
+  camera.left = -halfWidth;
+  camera.right =  halfWidth;
+  camera.top = halfHeight;
+  camera.bottom = -halfHeight;
+  camera.updateProjectionMatrix();
+
+  // 3) Update our bounce boundary
+  bounceBoxX = halfWidth - modelRadius;
+  bounceBoxY = halfHeight - modelRadius;
+}
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (model) {
+    // Move the hamster
+    model.position.x += velocity.x;
+    model.position.y += velocity.y;
+
+    // DVD bounce collisions in X
+    if (model.position.x > bounceBoxX) {
+      model.position.x = bounceBoxX;
+      velocity.x *= -1;
+      randomizeColorAndSpin();
+    } else if (model.position.x < -bounceBoxX) {
+      model.position.x = -bounceBoxX;
+      velocity.x *= -1;
+      randomizeColorAndSpin();
+    }
+
+    // DVD bounce collisions in Y
+    if (model.position.y > bounceBoxY) {
+      model.position.y = bounceBoxY;
+      velocity.y *= -1;
+      randomizeColorAndSpin();
+    } else if (model.position.y < -bounceBoxY) {
+      model.position.y = -bounceBoxY;
+      velocity.y *= -1;
+      randomizeColorAndSpin();
+    }
+
+    // Spin on x, y, z axes
+    model.rotation.x += spinDirection.x;
+    model.rotation.y += spinDirection.y;
+    model.rotation.z += spinDirection.z;
+  }
+
+  // If OrbitControls is used
+  controls.update();
+  renderer.render(scene, camera);
+}
+
+/** 
+ * On every bounce, we change the color randomly
+ * and change spin direction & speed to a new random vector
+ */
+function randomizeColorAndSpin() {
+  if (!model) return;
+
+  // Randomize color
+  const randomColor = Math.floor(Math.random() * 0xffffff);
+  model.traverse(child => {
+    if (child.isMesh && child.material) {
+      child.material.color.setHex(randomColor);
+    }
+  });
+
+  // Randomize spin direction
+  // e.g., in the range -0.03 .. +0.03
+  const maxSpin = 0.03;
+  spinDirection.set(
+    (Math.random() * (maxSpin * 2)) - maxSpin,
+    (Math.random() * (maxSpin * 2)) - maxSpin,
+    (Math.random() * (maxSpin * 2)) - maxSpin
+  );
+}
+</script>
+</body>
+</html>
