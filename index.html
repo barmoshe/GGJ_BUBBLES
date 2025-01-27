@@ -177,7 +177,7 @@
       to { transform: translateX(-1000px) scale(1.5); }
     }
 
-    /* 2.3 Scary: Advanced Flickering with Shadow Shapes */
+    /* 2.3 Scary: Enhanced Flickering with Shadow Shapes */
     .bg-scary {
       position: fixed;
       top: 0;
@@ -186,7 +186,13 @@
       height: 100%;
       overflow: hidden;
       z-index: 0;
-      background: #2f002f;
+      background: radial-gradient(circle at 50% 50%, #1a0000, #330000, #1a0000); /* Deep red hues */
+      animation: scaryBackgroundPulse 10s ease infinite;
+    }
+
+    @keyframes scaryBackgroundPulse {
+      0%, 100% { background: radial-gradient(circle at 50% 50%, #1a0000, #330000, #1a0000); }
+      50% { background: radial-gradient(circle at 50% 50%, #330000, #1a0000, #330000); }
     }
 
     .bg-scary::before {
@@ -195,28 +201,28 @@
       width: 100%;
       height: 100%;
       background: radial-gradient(circle, rgba(255,0,0,0.5), rgba(0,100,0,0.3));
-      opacity: 0;
-      animation: scaryFlicker 2s infinite;
-      mix-blend-mode: screen;
+      opacity: 0.7; /* Increased opacity for a denser look */
+      animation: scaryFlicker 3s infinite;
+      mix-blend-mode: overlay;
     }
 
     @keyframes scaryFlicker {
-      0%, 100% { opacity: 0; }
-      25%, 75% { opacity: 0.7; }
+      0%, 100% { opacity: 0.7; }
+      25%, 75% { opacity: 0.9; }
       50% { opacity: 1; }
     }
 
-    /* Shadow Shapes */
+    /* Enhanced Shadow Shapes */
     .bg-scary .shadow {
       position: absolute;
-      width: 100px;
-      height: 100px;
-      background: rgba(0, 0, 0, 0.3);
+      width: 80px; /* Reduced size for more shadows */
+      height: 80px;
+      background: rgba(0, 0, 0, 0.5); /* Darker shadows */
       border-radius: 50%;
       top: 20%;
       left: 30%;
-      filter: blur(20px);
-      animation: moveShadow 10s infinite alternate;
+      filter: blur(30px); /* Increased blur for a ghostly effect */
+      animation: moveShadow 8s infinite alternate;
     }
 
     .bg-scary .shadow::after {
@@ -226,20 +232,36 @@
       height: 100%;
       background: inherit;
       border-radius: inherit;
-      animation: scaleShadow 10s infinite alternate;
+      animation: scaleShadow 8s infinite alternate;
     }
 
     @keyframes moveShadow {
       from { transform: translate(0, 0); }
-      to { transform: translate(200px, -200px); }
+      to { transform: translate(150px, -150px); }
     }
 
     @keyframes scaleShadow {
       from { transform: scale(1); }
-      to { transform: scale(1.5); }
+      to { transform: scale(1.3); }
     }
 
-    /* 2.4 Void: Dynamic Starfield with Shooting Stars */
+    /* Additional Eerie Elements */
+    .bg-scary .eerie-mist {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMTAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDUwQzIwLjg3NyA1MCAzMi43NjMgNDYuNTY5IDQ0LjIzOSA0MCA1NS44NTMgMzEuNDY3IDM3LjQ4OCAxMjQuNjk5IDM3LjQ4OCAxMjQuNjk5QzM3LjQ4OCAxMjQuNjk5IDc1LjA4OSA0Ny4zMTMgNzUuMDg5IDQ3LjMxM0M3NS4wODkgNDcuMzEzIDk4LjI0OCA0Ni41NjkgMTAwIDUwWiIgZmlsbD0iI2ZmZiIgLz48L3N2Zz4=');
+      opacity: 0.3;
+      animation: mistMove 10s linear infinite;
+      pointer-events: none;
+    }
+
+    @keyframes mistMove {
+      from { transform: translateX(-100px) translateY(-50px) scale(1); opacity: 0.3; }
+      to { transform: translateX(100px) translateY(-150px) scale(1.2); opacity: 0.1; }
+    }
+
+    /* 2.4 Void: Enhanced Voidish Vibes */
     .bg-void {
       position: fixed;
       top: 0;
@@ -248,7 +270,15 @@
       height: 100%;
       overflow: hidden;
       z-index: 0;
-      background: #000;
+      background: radial-gradient(circle at 20% 20%, #1a1a2e, #16213e, #0f3460, #0f2027);
+      /* Deep space colors */
+      animation: voidGradient 20s ease infinite;
+    }
+
+    @keyframes voidGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     /* Starfield Background */
@@ -261,7 +291,7 @@
                   radial-gradient(white 1px, transparent 1px);
       background-size: 3px 3px;
       animation: starfieldMove 60s linear infinite;
-      opacity: 0.5;
+      opacity: 0.8; /* Increased opacity for more stars */
     }
 
     @keyframes starfieldMove {
@@ -273,13 +303,13 @@
     .bg-void .shooting-star {
       position: absolute;
       width: 2px;
-      height: 100px;
+      height: 150px; /* Longer shooting stars for a more dramatic effect */
       background: linear-gradient(white, rgba(255, 255, 255, 0));
       top: 0;
       left: 0;
       opacity: 0;
       transform: rotate(45deg);
-      animation: shootingStar 5s infinite;
+      animation: shootingStar 7s infinite;
     }
 
     @keyframes shootingStar {
@@ -291,7 +321,7 @@
         opacity: 1;
       }
       20% {
-        transform: translate(500px, 500px) rotate(45deg);
+        transform: translate(700px, 700px) rotate(45deg);
         opacity: 0;
       }
       100% {
@@ -394,59 +424,6 @@
     #muteBtn span {
       font-size: 20px; /* Larger icon for better visibility */
     }
-    /* Speed slider label */
-    .sliderContainer {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      color: #fff;
-    }
-    .sliderContainer label {
-      font-size: 16px;
-      opacity: 0.9;
-      white-space: nowrap; /* Prevent label from wrapping */
-    }
-    /* Speed slider style */
-    #speedSlider {
-      width: 140px;
-      appearance: none;
-      height: 6px;
-      background: #555;
-      border-radius: 3px;
-      outline: none;
-      transition: background 0.3s ease;
-      cursor: pointer;
-    }
-    #speedSlider:hover {
-      background: #666;
-    }
-    #speedSlider::-webkit-slider-thumb {
-      appearance: none;
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      border: 2px solid #333;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    #speedSlider::-webkit-slider-thumb:hover {
-      background: #ddd;
-      transform: scale(1.2);
-    }
-    #speedSlider::-moz-range-thumb {
-      width: 16px;
-      height: 16px;
-      border-radius: 50%;
-      background: #fff;
-      border: 2px solid #333;
-      cursor: pointer;
-      transition: background 0.3s ease, transform 0.2s ease;
-    }
-    #speedSlider::-moz-range-thumb:hover {
-      background: #ddd;
-      transform: scale(1.2);
-    }
 
     /* ======================================================
        5. Responsive Design Enhancements
@@ -466,12 +443,7 @@
       #muteBtn span {
         font-size: 18px;
       }
-      .sliderContainer label {
-        font-size: 14px;
-      }
-      #speedSlider {
-        width: 120px;
-      }
+      /* Adjust environment overlay for smaller screens */
       #audioChoiceOverlay .panel {
         padding: 20px 24px;
         gap: 20px;
@@ -516,7 +488,7 @@
     </div>
   </div>
 
-  <!-- Bottom-right controls: Change Env, Mute, Speed slider -->
+  <!-- Bottom-right controls: Change Env, Mute -->
   <div id="controlsOverlay">
     <button id="changeEnvBtn" class="button">Change Environment</button>
 
@@ -525,10 +497,7 @@
       <span id="muteLabel">Mute</span>
     </button>
 
-    <div class="sliderContainer">
-      <label for="speedSlider">Speed:</label>
-      <input id="speedSlider" type="range" min="0.01" max="0.5" step="0.01" value="0.18" aria-label="Adjust Speed" />
-    </div>
+    <!-- Speed Slider Removed -->
   </div>
 
   <!-- Three.js (r125) -->
@@ -541,7 +510,7 @@
        1. Global Variables
     ====================================================== */
     let scene, camera, renderer, model;
-    let velocity = new THREE.Vector2(0.15, 0.1);
+    let velocity = new THREE.Vector2(0.15, 0.1); // Default speed
     let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
     const BASE_HALF_HEIGHT = 30;
@@ -559,22 +528,25 @@
     const environments = {
       "Action": {
         bgClass: "bg-action",
-        music: "bg_music2.wav" // Ensure this file is correctly placed
+        music: "bg_music2.wav", // Ensure this file is correctly placed
+        speed: 0.65 // Faster speed for Action
       },
       "Calm": {
         bgClass: "bg-calm",
-        music: "BG_loop.wav" // Ensure this file is correctly placed
+        music: "BG_loop.wav", // Ensure this file is correctly placed
+        speed: 0.2 // Slower speed for Calm
       },
       "Scary": {
         bgClass: "bg-scary",
-        music: "33.wav" // Ensure this file is correctly placed
+        music: "33.wav", // Ensure this file is correctly placed
+        speed: 0.95 // Moderate speed for Scary
       },
       "Void": {
         bgClass: "bg-void",
-        music: null
+        music: null, // No background music for Void
+        speed: 0.0 // Default speed for Void
       }
     };
-
     /* ======================================================
        2. Environment Selection
     ====================================================== */
@@ -624,6 +596,9 @@
 
       // 7. Add environment-specific dynamic elements
       addDynamicElements(envKey);
+
+      // 8. Adjust speed based on environment
+      setEnvironmentSpeed(env.speed);
     }
 
     function stopCurrentBG() {
@@ -702,16 +677,10 @@
     }
 
     /* ======================================================
-       5. Speed Slider Functionality
+       5. Dynamic Speed Adjustment Based on Environment
     ====================================================== */
-    document.getElementById("speedSlider").addEventListener("input", (e) => {
-      const newSpeed = parseFloat(e.target.value);
-      setSpeed(newSpeed);
-    });
-
-    function setSpeed(newSpeed) {
-      const dir = velocity.clone().normalize();
-      velocity.copy(dir.multiplyScalar(newSpeed));
+    function setEnvironmentSpeed(envSpeed) {
+      velocity.set(envSpeed, envSpeed); // Set both x and y to envSpeed for uniform movement
     }
 
     /* ======================================================
@@ -894,6 +863,7 @@
           break;
         case "Scary":
           addScaryShadows();
+          addEerieMist(); // Added mist for more depth
           break;
         case "Void":
           addShootingStars();
@@ -944,35 +914,47 @@
       dynamicElements.push(clouds);
     }
 
-    /* 9.3 Scary: Shadow Shapes */
+    /* 9.3 Scary: Enhanced Shadow Shapes */
     function addScaryShadows() {
       const bgScary = document.querySelector('.bg-scary');
       if (!bgScary) return;
 
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 8; i++) { // Increased number of shadows
         const shadow = document.createElement('div');
         shadow.classList.add('shadow');
         shadow.style.left = `${Math.random() * 100}%`;
         shadow.style.top = `${Math.random() * 100}%`;
-        shadow.style.animationDuration = `${10 + Math.random() * 10}s`;
+        shadow.style.animationDuration = `${8 + Math.random() * 12}s`; // Varied animation durations
         bgScary.appendChild(shadow);
         dynamicElements.push(shadow);
       }
     }
 
-    /* 9.4 Void: Shooting Stars */
+    /* 9.4 Void: Enhanced Shooting Stars for More Voidish Vibes */
     function addShootingStars() {
       const bgVoid = document.querySelector('.bg-void');
       if (!bgVoid) return;
 
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 5; i++) { // Increased number for more dynamic effect
         const shootingStar = document.createElement('div');
         shootingStar.classList.add('shooting-star');
         shootingStar.style.left = `${Math.random() * 100}%`;
-        shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+        shootingStar.style.animationDelay = `${Math.random() * 15}s`; // Spread out shooting stars
+        shootingStar.style.animationDuration = `7s`; // Consistent duration for realism
         bgVoid.appendChild(shootingStar);
         dynamicElements.push(shootingStar);
       }
+    }
+
+    /* 9.5 Scary: Add Eerie Mist */
+    function addEerieMist() {
+      const bgScary = document.querySelector('.bg-scary');
+      if (!bgScary) return;
+
+      const mist = document.createElement('div');
+      mist.classList.add('eerie-mist');
+      bgScary.appendChild(mist);
+      dynamicElements.push(mist);
     }
 
     /* ======================================================
