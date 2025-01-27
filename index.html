@@ -539,7 +539,7 @@
       "Scary": {
         bgClass: "bg-scary",
         music: "33.wav", // Ensure this file is correctly placed
-        speed: 0.95 // Moderate speed for Scary
+        speed: null // Speed handled dynamically for Scary
       },
       "Void": {
         bgClass: "bg-void",
@@ -547,13 +547,30 @@
         speed: 0.0 // Default speed for Void
       }
     };
+
     /* ======================================================
-       2. Environment Selection
+       2. Speed Scaling Based on Screen Width
+    ====================================================== */
+    function getSpeedScale() {
+      const baseWidth = 1920;
+      const minScale = 0.4;
+      const maxScale = 1.0;
+      const currentWidth = window.innerWidth;
+      const scale = Math.min(Math.max(currentWidth / baseWidth, minScale), maxScale);
+      return scale;
+    }
+
+    let previousScale = getSpeedScale();
+
+    /* ======================================================
+       3. Environment Selection
     ====================================================== */
     document.getElementById("envActionBtn").addEventListener("click", () => pickEnvironment("Action"));
     document.getElementById("envCalmBtn").addEventListener("click", () => pickEnvironment("Calm"));
     document.getElementById("envScaryBtn").addEventListener("click", () => pickEnvironment("Scary"));
     document.getElementById("envVoidBtn").addEventListener("click", () => pickEnvironment("Void"));
+
+    let speedIntervalId = null; // To manage speed changes in Scary environment
 
     async function pickEnvironment(envKey) {
       const env = environments[envKey];
@@ -598,7 +615,17 @@
       addDynamicElements(envKey);
 
       // 8. Adjust speed based on environment
-      setEnvironmentSpeed(env.speed);
+      if (envKey === "Scary") {
+        // Handle Scary environment speed separately
+        startScarySpeedChanges();
+      } else {
+        // Clear any existing speed intervals
+        if (speedIntervalId) {
+          clearInterval(speedIntervalId);
+          speedIntervalId = null;
+        }
+        setEnvironmentSpeed(env.speed);
+      }
     }
 
     function stopCurrentBG() {
@@ -610,6 +637,12 @@
 
       // Remove dynamic elements specific to the previous environment
       removeDynamicElements();
+
+      // Clear any existing speed intervals
+      if (speedIntervalId) {
+        clearInterval(speedIntervalId);
+        speedIntervalId = null;
+      }
     }
 
     function hideEnvironmentOverlay() {
@@ -639,7 +672,7 @@
     }
 
     /* ======================================================
-       3. "Change Environment" Button
+       4. "Change Environment" Button
     ====================================================== */
     document.getElementById("changeEnvBtn").addEventListener("click", () => {
       showEnvironmentOverlay();
@@ -654,7 +687,7 @@
     }
 
     /* ======================================================
-       4. Mute / Unmute Functionality
+       5. Mute / Unmute Functionality
     ====================================================== */
     document.getElementById("muteBtn").addEventListener("click", () => {
       muted = !muted;
@@ -677,14 +710,39 @@
     }
 
     /* ======================================================
-       5. Dynamic Speed Adjustment Based on Environment
+       6. Dynamic Speed Adjustment Based on Environment
     ====================================================== */
     function setEnvironmentSpeed(envSpeed) {
-      velocity.set(envSpeed, envSpeed); // Set both x and y to envSpeed for uniform movement
+      const scale = getSpeedScale();
+      velocity.set(envSpeed * scale, envSpeed * scale);
+    }
+
+    /* Function to start random speed changes for Scary environment */
+    function startScarySpeedChanges() {
+      // Clear any existing interval just in case
+      if (speedIntervalId) {
+        clearInterval(speedIntervalId);
+      }
+
+      // Initial random speed
+      setRandomVelocity();
+
+      // Set interval to change speed every 0.2 seconds
+      speedIntervalId = setInterval(setRandomVelocity, 200);
+    }
+
+    /* Function to set random velocity */
+    function setRandomVelocity() {
+      const minSpeed = -1.0;
+      const maxSpeed = 1.0;
+      const randomX = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+      const randomY = Math.random() * (maxSpeed - minSpeed) + minSpeed;
+      const scale = getSpeedScale();
+      velocity.set(randomX * scale, randomY * scale);
     }
 
     /* ======================================================
-       6. Three.js Setup (with alpha => transparent background)
+       7. Three.js Setup (with alpha => transparent background)
     ====================================================== */
     initThree();
     animate();
@@ -759,10 +817,13 @@
       camera.top    =  BASE_HALF_HEIGHT;
       camera.bottom = -BASE_HALF_HEIGHT;
       camera.updateProjectionMatrix();
+
+      // Adjust velocity scale
+      adjustCurrentVelocityScale();
     }
 
     /* ======================================================
-       7. Main Animation Loop
+       8. Main Animation Loop
     ====================================================== */
     function animate() {
       requestAnimationFrame(animate);
@@ -810,7 +871,7 @@
     }
 
     /* ======================================================
-       8. Bouncing Logic
+       9. Bouncing Logic
     ====================================================== */
     function onBounce() {
       if (!model) return;
@@ -849,7 +910,7 @@
     }
 
     /* ======================================================
-       9. Dynamic Elements Management
+       10. Dynamic Elements Management
     ====================================================== */
     let dynamicElements = [];
 
@@ -878,7 +939,7 @@
       dynamicElements = [];
     }
 
-    /* 9.1 Action: Enhanced Particle Explosion */
+    /* 10.1 Action: Enhanced Particle Explosion */
     function addActionParticles() {
       const bgAction = document.querySelector('.bg-action');
       if (!bgAction) return;
@@ -903,7 +964,7 @@
       dynamicElements.push(glow);
     }
 
-    /* 9.2 Calm: Parallax Clouds */
+    /* 10.2 Calm: Parallax Clouds */
     function addCalmClouds() {
       const bgCalm = document.querySelector('.bg-calm');
       if (!bgCalm) return;
@@ -914,7 +975,7 @@
       dynamicElements.push(clouds);
     }
 
-    /* 9.3 Scary: Enhanced Shadow Shapes */
+    /* 10.3 Scary: Enhanced Shadow Shapes */
     function addScaryShadows() {
       const bgScary = document.querySelector('.bg-scary');
       if (!bgScary) return;
@@ -930,7 +991,7 @@
       }
     }
 
-    /* 9.4 Void: Enhanced Shooting Stars for More Voidish Vibes */
+    /* 10.4 Void: Enhanced Shooting Stars for More Voidish Vibes */
     function addShootingStars() {
       const bgVoid = document.querySelector('.bg-void');
       if (!bgVoid) return;
@@ -946,7 +1007,7 @@
       }
     }
 
-    /* 9.5 Scary: Add Eerie Mist */
+    /* 10.5 Scary: Add Eerie Mist */
     function addEerieMist() {
       const bgScary = document.querySelector('.bg-scary');
       if (!bgScary) return;
@@ -958,7 +1019,16 @@
     }
 
     /* ======================================================
-       10. Initialize with Default Environment
+       11. Adjust Velocity Scale on Window Resize
+    ====================================================== */
+    function adjustCurrentVelocityScale() {
+      const scale = getSpeedScale();
+      velocity.set(velocity.x / previousScale * scale, velocity.y / previousScale * scale);
+      previousScale = scale;
+    }
+
+    /* ======================================================
+       12. Initialize with Default Environment
     ====================================================== */
     document.addEventListener("DOMContentLoaded", () => {
       // Set a default environment, e.g., "Void"
