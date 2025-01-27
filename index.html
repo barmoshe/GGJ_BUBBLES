@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AshaHi ScreenSaver</title>
+  <title>AshaHi ScreenSaver with FBX Model</title>
   <style>
     /* ======================================================
        1. Global Styles and Resets
@@ -500,21 +500,29 @@
     <!-- Speed Slider Removed -->
   </div>
 
-  <!-- Three.js (r125) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
-  <!-- OBJLoader (r125) -->
-  <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/loaders/OBJLoader.js"></script>
+<script src="
+https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
+"></script>
 
+
+  <!-- Three.js (r128 for FBXLoader compatibility) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- FBXLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
+  <!-- Inflate (required by FBXLoader for compressed files) -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/inflate.min.js"></script>
+  
   <script>
     /* ======================================================
        1. Global Variables
     ====================================================== */
-    let scene, camera, renderer, model;
-    let velocity = new THREE.Vector2(0.15, 0.1); // Default speed
-    let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
+    let scene, camera, renderer, model, mixer;
+    let velocity = new THREE.Vector2(0.05, 0.05); // Reduced speed to prevent frequent bounces
+    // Removed spinDirection as FBX animations may handle rotation
+    // let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
     const BASE_HALF_HEIGHT = 30;
-    const MODEL_RADIUS = 7;
+    const MODEL_RADIUS = 10; // Increased to accommodate larger model
 
     let currentBgAudio = null; // HTMLAudio for background
     let muted = false;
@@ -739,13 +747,16 @@
       const randomY = Math.random() * (maxSpeed - minSpeed) + minSpeed;
       const scale = getSpeedScale();
       velocity.set(randomX * scale, randomY * scale);
-    }
+    }    const clock = new THREE.Clock();
+
 
     /* ======================================================
        7. Three.js Setup (with alpha => transparent background)
     ====================================================== */
     initThree();
-    animate();
+    animate(); // Start the animation loop
+
+    /* Initialize Clock Outside Animate Loop */
 
     function initThree() {
       scene = new THREE.Scene();
@@ -762,7 +773,7 @@
         1,
         1000
       );
-      camera.position.set(0, 50, 100);
+      camera.position.set(0, 0, 100); // Adjusted to center the model
       camera.lookAt(0, 0, 0);
 
       // Transparent renderer so body background is visible
@@ -771,32 +782,49 @@
       renderer.setSize(w, h);
       document.getElementById("container").appendChild(renderer.domElement);
 
-      // Load the model (OBJ)
-      const loader = new THREE.OBJLoader();
+      // **3.1 Remove OrbitControls to Lock Viewport**
+      // OrbitControls are removed to prevent user interaction
+const animationPaths=[
+  "BreakdanceFootworkToIdle.fbx",
+  "Capoeira.fbx",
+  "JoyfulJump.fbx",
+  "DancingTwerk.fbx",
+]
+      // **3.2 Load the FBX Model**
+      const loader = new THREE.FBXLoader();
       loader.load(
-        "Hamster_GGJ_021.obj", // Ensure this file is correctly placed
-        (obj) => {
-          model = obj;
-          // Rotate 180° so front faces camera
-          model.rotation.y = Math.PI;
+        animationPaths[Math.floor(Math.random()*animationPaths.length)],
+        (fbx) => {
+          if (model) {
+            // Prevent multiple instances
+            scene.remove(model);
+            model.traverse(child => {
+              if (child.isMesh) {
+                child.material.dispose();
+              }
+            });
+          }
 
-          // Apply a more stylish material
-          model.traverse(child => {
-            if (child.isMesh) {
-              child.material = new THREE.MeshStandardMaterial({ 
-                color: 0xffffff,
-                metalness: 0.5,
-                roughness: 0.3
-              });
-            }
-          });
+          model = fbx;
+          model.scale.set(1, 1, 1); // Adjust scale if needed
+          model.position.set(0, 0, 0);
           scene.add(model);
+
+          // **3.3 Setup Animation Mixer (If FBX has animations)**
+          mixer = new THREE.AnimationMixer(model);
+          if (fbx.animations && fbx.animations.length > 0) {
+            fbx.animations.forEach(clip => {
+              mixer.clipAction(clip).play();
+            });
+          } else {
+            console.warn('No animations found in the FBX model.');
+          }
         },
-        (xhr) => console.log(((xhr.loaded / xhr.total) * 100).toFixed(1) + "% loaded"),
-        (err) => console.error("Error loading OBJ:", err)
+        (xhr) => console.log(`FBX Model: ${(xhr.loaded / xhr.total * 100).toFixed(1)}% loaded`),
+        (error) => console.error("Error loading FBX model:", error)
       );
 
-      // Lights
+      // **3.4 Lights**
       const ambient = new THREE.AmbientLight(0xffffff, 0.5);
       scene.add(ambient);
       const directional = new THREE.DirectionalLight(0xffffff, 1);
@@ -828,6 +856,10 @@
     function animate() {
       requestAnimationFrame(animate);
 
+      const delta = clock.getDelta();
+
+      if (mixer) mixer.update(delta); // Update animations
+
       if (model) {
         // Move
         model.position.x += velocity.x;
@@ -835,38 +867,52 @@
 
         // Bounce boundary
         const { halfW, halfH } = getCurrentBounceBox();
+        let bounced = false;
+
         if (model.position.x > halfW) {
           model.position.x = halfW;
           velocity.x *= -1;
-          onBounce();
+          bounced = true;
         } else if (model.position.x < -halfW) {
           model.position.x = -halfW;
           velocity.x *= -1;
-          onBounce();
+          bounced = true;
         }
+
         if (model.position.y > halfH) {
           model.position.y = halfH;
           velocity.y *= -1;
-          onBounce();
+          bounced = true;
         } else if (model.position.y < -halfH) {
           model.position.y = -halfH;
           velocity.y *= -1;
+          bounced = true;
+        }
+
+        if (bounced) {
           onBounce();
         }
 
-        // Spin
+        /* 
+           Removed spin updates to prevent unnecessary rotations that might cause
+           boundary collisions. If you still want the model to spin, consider limiting
+           the spin speed or ensuring it doesn't affect position-based collisions.
+        */
+        /*
+        // Spin (optional, can be removed if not needed)
         model.rotation.x += spinDirection.x;
         model.rotation.y += spinDirection.y;
         model.rotation.z += spinDirection.z;
+        */
       }
 
       renderer.render(scene, camera);
     }
 
     function getCurrentBounceBox() {
-      const aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
+      // Define boundaries based on camera view
       const halfH = (BASE_HALF_HEIGHT / camera.zoom) - MODEL_RADIUS;
-      const halfW = halfH * aspect;
+      const halfW = halfH * (window.innerWidth / window.innerHeight);
       return { halfW, halfH };
     }
 
@@ -876,7 +922,7 @@
     function onBounce() {
       if (!model) return;
 
-      // Random color with better contrast
+      // Change color of all mesh materials
       const randColor = Math.floor(Math.random() * 0xFFFFFF);
       model.traverse(child => {
         if (child.isMesh && child.material) {
@@ -884,15 +930,7 @@
         }
       });
 
-      // Random spin
-      const maxSpin = 0.03;
-      spinDirection.set(
-        (Math.random() * maxSpin * 2) - maxSpin,
-        (Math.random() * maxSpin * 2) - maxSpin,
-        (Math.random() * maxSpin * 2) - maxSpin
-      );
-
-      // Bounce sound if not muted
+      // Play bounce sound if not muted
       playBounceSound();
     }
 
