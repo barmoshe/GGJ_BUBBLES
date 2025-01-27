@@ -2,30 +2,264 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>AshaHi ScreenSaver (WebAudio SFX + BG Music)</title>
+  <title>AshaHi ScreenSaver (Environments + Change Button)</title>
   <style>
-    /* Full-window reset & subtle gradient background */
+    /* Full-window reset */
     html, body {
       margin: 0;
       padding: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #0c0c0c 0%, #202020 100%);
+      background: #000; /* Overridden by chosen environment class */
       overflow: hidden;
+      transition: background 1s ease; /* Smooth transition when changing backgrounds */
+      position: relative;
     }
     #container {
       width: 100%;
       height: 100%;
       position: relative;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 
-                   'Helvetica Neue', Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
       color: #fff;
+      z-index: 1; /* Ensure it stays above the animated backgrounds */
     }
-    /* Fullscreen overlay for choosing Audio style */
-    #audioChoiceOverlay {
+
+    /* Background Animations */
+
+    /* 1. Action: Advanced Animated Fire Effect with Particle Explosion */
+    .bg-action {
       position: absolute;
       top: 0;
       left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      background: #000;
+    }
+
+    .bg-action::before, .bg-action::after {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      top: -50%;
+      left: -50%;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 140, 0, 0.6), rgba(255, 87, 34, 0.4), rgba(255, 0, 0, 0.2));
+      animation: fireFlame 3s infinite ease-in-out;
+      opacity: 0.5;
+      mix-blend-mode: multiply;
+    }
+
+    .bg-action::after {
+      animation-delay: 1.5s;
+      opacity: 0.3;
+    }
+
+    @keyframes fireFlame {
+      0% {
+        transform: scale(1) translateY(0px);
+        opacity: 0.5;
+      }
+      50% {
+        transform: scale(1.2) translateY(-30px);
+        opacity: 0.7;
+      }
+      100% {
+        transform: scale(1) translateY(0px);
+        opacity: 0.5;
+      }
+    }
+
+    /* Additional Particle Layer for Action */
+    .bg-action .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(255, 165, 0, 0.8);
+      border-radius: 50%;
+      opacity: 0;
+      animation: particleBurst 2s infinite;
+    }
+
+    @keyframes particleBurst {
+      0% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      100% {
+        transform: translate(500px, -500px) scale(0);
+        opacity: 0;
+      }
+    }
+
+    /* 2. Calm: Advanced Calming Gradient with Parallax Clouds */
+    .bg-calm {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      background: linear-gradient(120deg, #a8edea, #fed6e3);
+      background-size: 400% 400%;
+      animation: calmGradient 15s ease infinite;
+    }
+
+    @keyframes calmGradient {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Parallax Clouds */
+    .bg-calm .clouds {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 200%;
+      height: 200%;
+      background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjEwMCIgdmlld0JveD0iMCAwIDIwMCAxMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iNTAiIGN5PSI1MCIgcj0iMjAiIHN0eWxlPSJmaWxsOiNmZmY7c3Ryb2tlOiMwMDA7c3Ryb2tlLXdpZHRoOjI7Ii8+PGNpcmNsZSBjeD0iMTUwIiBjeT0iNTAiIHI9IjIwIiBzdHlsZT0iZmlsbDojZmZmO3N0cm9rZTojMDAwO3N0cm9rZS13aWR0aDoyOyIvPjwvc3ZnPg==') repeat;
+      animation: moveClouds 60s linear infinite;
+      opacity: 0.3;
+      transform: scale(1.5);
+    }
+
+    @keyframes moveClouds {
+      from { transform: translateX(0); }
+      to { transform: translateX(-1000px); }
+    }
+
+    /* 3. Scary: Advanced Flickering with Shadow Shapes */
+    .bg-scary {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      background: #2f002f;
+    }
+
+    .bg-scary::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle, rgba(255,0,0,0.5), rgba(0,100,0,0.3));
+      opacity: 0;
+      animation: scaryFlicker 2s infinite;
+      mix-blend-mode: screen;
+    }
+
+    @keyframes scaryFlicker {
+      0%, 100% { opacity: 0; }
+      25%, 75% { opacity: 0.7; }
+      50% { opacity: 1; }
+    }
+
+    /* Shadow Shapes */
+    .bg-scary .shadow {
+      position: absolute;
+      width: 100px;
+      height: 100px;
+      background: rgba(0, 0, 0, 0.3);
+      border-radius: 50%;
+      top: 20%;
+      left: 30%;
+      filter: blur(20px);
+      animation: moveShadow 10s infinite alternate;
+    }
+
+    .bg-scary .shadow::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: inherit;
+      border-radius: inherit;
+      animation: scaleShadow 10s infinite alternate;
+    }
+
+    @keyframes moveShadow {
+      from { transform: translate(0, 0); }
+      to { transform: translate(200px, -200px); }
+    }
+
+    @keyframes scaleShadow {
+      from { transform: scale(1); }
+      to { transform: scale(1.5); }
+    }
+
+    /* 4. Void: Dynamic Starfield with Shooting Stars */
+    .bg-void {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      z-index: 0;
+      background: #000;
+    }
+
+    /* Starfield Background */
+    .bg-void::before {
+      content: '';
+      position: absolute;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(white 1px, transparent 1px),
+                  radial-gradient(white 1px, transparent 1px);
+      background-size: 3px 3px;
+      animation: starfieldMove 60s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes starfieldMove {
+      from { background-position: 0 0, 0 0; }
+      to { background-position: 100px 100px, -100px 100px; }
+    }
+
+    /* Shooting Stars */
+    .bg-void .shooting-star {
+      position: absolute;
+      width: 2px;
+      height: 100px;
+      background: linear-gradient(white, rgba(255, 255, 255, 0));
+      top: 0;
+      left: 0;
+      opacity: 0;
+      transform: rotate(45deg);
+      animation: shootingStar 5s infinite;
+    }
+
+    @keyframes shootingStar {
+      0% {
+        transform: translateX(0) rotate(45deg);
+        opacity: 0;
+      }
+      10% {
+        opacity: 1;
+      }
+      20% {
+        transform: translateX(500px) translateY(500px) rotate(45deg);
+        opacity: 0;
+      }
+      100% {
+        opacity: 0;
+      }
+    }
+
+    /* The full-screen overlay to pick environment */
+    #audioChoiceOverlay {
+      position: absolute;
+      top: 0; left: 0;
       width: 100%; 
       height: 100%;
       display: flex;
@@ -36,6 +270,11 @@
       font-size: 1.2em;
       text-align: center;
       z-index: 999999;
+      transition: opacity 0.5s ease, visibility 0.5s ease;
+    }
+    #audioChoiceOverlay.hidden {
+      opacity: 0;
+      visibility: hidden;
     }
     #audioChoiceOverlay .panel {
       display: flex;
@@ -67,6 +306,7 @@
       bottom: 14px;
       right: 14px;
       display: flex;
+      flex-wrap: wrap; /* allows wrapping on smaller screens */
       align-items: center;
       gap: 12px;
       background: rgba(0, 0, 0, 0.35);
@@ -74,8 +314,8 @@
       border-radius: 6px;
       z-index: 9999;
     }
-    /* Mute/Unmute button */
-    #muteBtn {
+    /* Shared button style */
+    .button {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -88,8 +328,11 @@
       cursor: pointer;
       transition: background 0.2s ease;
     }
-    #muteBtn:hover {
+    .button:hover {
       background: rgba(255,255,255,0.2);
+    }
+    #muteBtn span {
+      font-size: 16px;
     }
     /* Speed slider label */
     .sliderContainer {
@@ -123,6 +366,7 @@
       background: #fff;
       border: 2px solid #333;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
     #speedSlider::-moz-range-thumb {
       width: 14px;
@@ -131,6 +375,7 @@
       background: #fff;
       border: 2px solid #333;
       cursor: pointer;
+      transition: background 0.2s ease;
     }
 
     /* Responsive (mobile) styles */
@@ -154,7 +399,8 @@
         gap: 10px;
         padding: 8px;
       }
-      #muteBtn {
+      #muteBtn,
+      #changeEnvBtn {
         width: 100%;
         justify-content: center;
       }
@@ -170,15 +416,15 @@
 </head>
 <body>
 <div id="container">
-  <!-- Fullscreen overlay to pick "Action" or "Calm" or "Scary" or "No audio" -->
+  <!-- Fullscreen overlay for environment choice -->
   <div id="audioChoiceOverlay">
     <div class="panel">
-      <p style="margin:0; font-size:1.1em;">Choose your background music:</p>
+      <p style="margin:0; font-size:1.1em;">Pick Your Environment:</p>
       <div style="display:flex; gap:10px; justify-content:center; flex-wrap: wrap;">
-        <button id="actionBtn">Action Music</button>
-        <button id="calmBtn">Calm Music</button>
-        <button id="scaryBtn">Scary Music</button>
-        <button id="noAudioBtn">No Audio</button>
+        <button id="envActionBtn">Action</button>
+        <button id="envCalmBtn">Calm</button>
+        <button id="envScaryBtn">Scary</button>
+        <button id="envVoidBtn">Void</button>
       </div>
       <p style="font-size:0.9em; opacity:0.7; margin-top:8px;">
         (Recommended with audio)
@@ -186,12 +432,15 @@
     </div>
   </div>
 
-  <!-- Bottom-right controls: Mute + Speed slider -->
+  <!-- Bottom-right controls: Change Env, Mute, Speed slider -->
   <div id="controlsOverlay">
-    <button id="muteBtn">
-      <span id="muteIcon" style="font-size:16px;">🔊</span>
+    <button id="changeEnvBtn" class="button">Change Environment</button>
+
+    <button id="muteBtn" class="button">
+      <span id="muteIcon">🔊</span>
       <span id="muteLabel">Mute</span>
     </button>
+
     <div class="sliderContainer">
       <label for="speedSlider">Speed:</label>
       <input id="speedSlider" type="range" min="0.01" max="0.5" step="0.01" value="0.18" />
@@ -201,117 +450,148 @@
 
 <!-- Three.js (r125) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/build/three.min.js"></script>
-
 <!-- OBJLoader (r125) -->
 <script src="https://cdn.jsdelivr.net/npm/three@0.125.2/examples/js/loaders/OBJLoader.js"></script>
 
 <script>
 /* ======================================================
-   1) Global variables / config
+   1) Global variables
    ====================================================== */
 let scene, camera, renderer, model;
-
-// Orthographic camera base half-size
-const BASE_HALF_HEIGHT = 30;
-const MODEL_RADIUS = 7;
-
-// Movement & spin
 let velocity = new THREE.Vector2(0.15, 0.1);
 let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
 
-// The background track is an HTMLAudio element
-let currentBgAudio = null;
+const BASE_HALF_HEIGHT = 30;
+const MODEL_RADIUS = 7;
+
+let currentBgAudio = null; // HTMLAudio for background
 let muted = false;
 
 // Web Audio for bounce SFX
-let audioCtx = null; 
-let bounceBuffers = []; // store decoded AudioBuffers here
-// The list of bounce effect files
-const bounceSounds = ["fall1.wav", "fall2.wav", "fall3.wav"];
+let audioCtx = null;
+let bounceBuffers = [];
+const bounceSFX = ["fall1.wav","fall2.wav","fall3.wav"];
+
+/* Our environments: class + optional music track */
+const environments = {
+  "Action": {
+    bgClass: "bg-action",
+    music: "bg_music2.wav"
+  },
+  "Calm": {
+    bgClass: "bg-calm",
+    music: "BG_loop.wav"
+  },
+  "Scary": {
+    bgClass: "bg-scary",
+    music: "33.wav"
+  },
+  "Void": {
+    bgClass: "bg-void",
+    music: null
+  }
+};
 
 /* ======================================================
-   2) Audio Choice Overlay & Listeners
+   2) Environment Choice
    ====================================================== */
-document.getElementById("actionBtn").addEventListener("click", () => {
-  pickBackground("bg_music2.wav"); // "Action"
-});
-document.getElementById("calmBtn").addEventListener("click", () => {
-  pickBackground("BG_loop.wav");   // "Calm"
-});
-document.getElementById("scaryBtn").addEventListener("click", () => {
-  pickBackground("33.wav");        // "Scary"
-});
-document.getElementById("noAudioBtn").addEventListener("click", () => {
-  // user chooses no audio => keep everything muted
-  muted = true;
-  updateMuteUI();
-  hideAudioChoiceOverlay();
-});
+document.getElementById("envActionBtn").addEventListener("click", () => pickEnvironment("Action"));
+document.getElementById("envCalmBtn").addEventListener("click", () => pickEnvironment("Calm"));
+document.getElementById("envScaryBtn").addEventListener("click", () => pickEnvironment("Scary"));
+document.getElementById("envVoidBtn").addEventListener("click", () => pickEnvironment("Void"));
 
-/**
- * Called if user chooses a background track (Action/Calm/Scary).
- * We create the background track via HTMLAudio, 
- * and also init the AudioContext for bounce SFX.
- */
-function pickBackground(bgFile) {
-  // 1) Create the background track
-  currentBgAudio = new Audio(bgFile);
-  currentBgAudio.loop = true;
-  currentBgAudio.volume = 0.5;
-  currentBgAudio.muted = muted;
-  currentBgAudio.setAttribute('playsinline',''); // iOS inline
-  currentBgAudio.play().catch(err => {
-    console.warn("Audio play blocked:", err);
-  });
+async function pickEnvironment(envKey) {
+  const env = environments[envKey];
+  if (!env) return;
 
-  // 2) Initialize Web Audio context for bounce SFX
-  initBounceAudio();
+  // 1) If old BG audio is playing, stop it
+  stopCurrentBG();
 
-  hideAudioChoiceOverlay();
-}
+  // 2) Remove existing environment classes
+  document.body.classList.remove(...Object.values(environments).map(e => e.bgClass));
 
-/** Hide the initial overlay */
-function hideAudioChoiceOverlay() {
-  const overlay = document.getElementById("audioChoiceOverlay");
-  if (overlay) overlay.style.display = "none";
-}
+  // 3) Add new environment class
+  document.body.classList.add(env.bgClass);
 
-/* ======================================================
-   3) Web Audio: bounce sounds
-   ====================================================== */
-async function initBounceAudio() {
-  // Create or resume AudioContext on user gesture
+  // 4) If the environment has a music track, create it
+  if (env.music) {
+    currentBgAudio = new Audio(env.music);
+    currentBgAudio.loop = true;
+    currentBgAudio.volume = 0.5;
+    currentBgAudio.muted = muted;
+    currentBgAudio.setAttribute('playsinline','');
+    try {
+      await currentBgAudio.play();
+    } catch(err) {
+      console.warn("Audio play blocked:", err);
+    }
+  } else {
+    // "Void" => no background track
+    currentBgAudio = null;
+  }
+
+  // 5) Initialize Web Audio for bounce SFX if not done
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    loadBounceSFX();
   }
-  // Preload & decode each bounce .wav
-  bounceBuffers = [];
-  for (const url of bounceSounds) {
+
+  // 6) Hide environment overlay
+  hideEnvironmentOverlay();
+
+  // 7) Add specific dynamic elements for environments
+  addDynamicElements(envKey);
+}
+
+function stopCurrentBG() {
+  if (currentBgAudio) {
+    currentBgAudio.pause();
+    currentBgAudio.src = ""; // release the audio element
+    currentBgAudio = null;
+  }
+
+  // Remove dynamic elements
+  removeDynamicElements();
+}
+
+function hideEnvironmentOverlay() {
+  const overlay = document.getElementById("audioChoiceOverlay");
+  if (overlay) {
+    overlay.classList.add("hidden");
+    setTimeout(() => {
+      overlay.style.display = "none";
+    }, 500); // Match the CSS transition duration
+  }
+}
+
+/* Pre-fetch & decode bounce SFX into AudioBuffers */
+async function loadBounceSFX() {
+  const buffers = [];
+  for (const url of bounceSFX) {
     try {
       const resp = await fetch(url);
       const arrayBuf = await resp.arrayBuffer();
       const audioBuf = await audioCtx.decodeAudioData(arrayBuf);
-      bounceBuffers.push(audioBuf);
+      buffers.push(audioBuf);
     } catch(e) {
-      console.warn("Error decoding SFX:", url, e);
+      console.warn("Error decoding bounce SFX:", url, e);
     }
   }
+  bounceBuffers = buffers;
 }
 
-/** Called on each bounce to play a short buffer. */
-function playBounceSound() {
-  if (!audioCtx || bounceBuffers.length === 0) return;
-  if (muted) return; // if muted, skip
-
-  // pick random buffer
-  const index = Math.floor(Math.random() * bounceBuffers.length);
-  const buf = bounceBuffers[index];
-  if (!buf) return;
-
-  const source = audioCtx.createBufferSource();
-  source.buffer = buf;
-  source.connect(audioCtx.destination);
-  source.start(0);
+/* ======================================================
+   3) "Change Environment" button
+   ====================================================== */
+document.getElementById("changeEnvBtn").addEventListener("click", () => {
+  showEnvironmentOverlay();
+});
+function showEnvironmentOverlay() {
+  const overlay = document.getElementById("audioChoiceOverlay");
+  if (overlay) {
+    overlay.style.display = "flex";
+    overlay.classList.remove("hidden");
+  }
 }
 
 /* ======================================================
@@ -324,7 +604,6 @@ document.getElementById("muteBtn").addEventListener("click", () => {
   }
   updateMuteUI();
 });
-
 function updateMuteUI() {
   const muteIcon = document.getElementById("muteIcon");
   const muteLabel = document.getElementById("muteLabel");
@@ -350,7 +629,7 @@ function setSpeed(newSpeed) {
 }
 
 /* ======================================================
-   6) Three.js Scene
+   6) Three.js Setup (with alpha => transparent background)
    ====================================================== */
 initThree();
 animate();
@@ -362,7 +641,6 @@ function initThree() {
   const h = window.innerHeight;
   const aspect = w / h;
 
-  // Orthographic camera
   camera = new THREE.OrthographicCamera(
     -BASE_HALF_HEIGHT * aspect,
      BASE_HALF_HEIGHT * aspect,
@@ -371,23 +649,25 @@ function initThree() {
     1,
     1000
   );
-  // position so model is visible from "front"
   camera.position.set(0, 50, 100);
   camera.lookAt(0, 0, 0);
 
-  renderer = new THREE.WebGLRenderer({ antialias: true });
+  // Transparent renderer so body background is visible
+  renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setClearColor(0x000000, 0);
   renderer.setSize(w, h);
   document.getElementById("container").appendChild(renderer.domElement);
 
-  // Load the .obj model
+  // Load the model (OBJ)
   const loader = new THREE.OBJLoader();
   loader.load(
     "Hamster_GGJ_021.obj",
     (obj) => {
       model = obj;
-      // rotate 180° so "front" faces camera
+      // Rotate 180° so front faces camera
       model.rotation.y = Math.PI;
-      // white material
+
+      // Basic white Phong
       model.traverse(child => {
         if (child.isMesh) {
           child.material = new THREE.MeshPhongMaterial({ color: 0xffffff });
@@ -427,11 +707,11 @@ function animate() {
   requestAnimationFrame(animate);
 
   if (model) {
-    // move the model
+    // move
     model.position.x += velocity.x;
     model.position.y += velocity.y;
 
-    // check collisions (DVD bounce logic)
+    // bounce boundary
     const { halfW, halfH } = getCurrentBounceBox();
     if (model.position.x > halfW) {
       model.position.x = halfW;
@@ -461,7 +741,6 @@ function animate() {
   renderer.render(scene, camera);
 }
 
-/* calculates bounding box minus the model radius */
 function getCurrentBounceBox() {
   const aspect = (camera.right - camera.left) / (camera.top - camera.bottom);
   const halfH = (BASE_HALF_HEIGHT / camera.zoom) - MODEL_RADIUS;
@@ -469,7 +748,9 @@ function getCurrentBounceBox() {
   return { halfW, halfH };
 }
 
-/* Called when the model hits a boundary */
+/* ======================================================
+   7) Bouncing logic
+   ====================================================== */
 function onBounce() {
   if (!model) return;
 
@@ -489,9 +770,117 @@ function onBounce() {
     (Math.random() * maxSpin * 2) - maxSpin
   );
 
-  // play bounce SFX via Web Audio
+  // bounce sound if not muted
   playBounceSound();
 }
+
+function playBounceSound() {
+  if (muted || !audioCtx || bounceBuffers.length === 0) return;
+
+  const index = Math.floor(Math.random() * bounceBuffers.length);
+  const buf = bounceBuffers[index];
+  if (!buf) return;
+
+  const source = audioCtx.createBufferSource();
+  source.buffer = buf;
+  source.connect(audioCtx.destination);
+  source.start(0);
+}
+
+/* ======================================================
+   8) Dynamic Elements Management
+   ====================================================== */
+let dynamicElements = [];
+
+function addDynamicElements(envKey) {
+  switch(envKey) {
+    case "Action":
+      addActionParticles();
+      break;
+    case "Calm":
+      addCalmClouds();
+      break;
+    case "Scary":
+      addScaryShadows();
+      break;
+    case "Void":
+      addShootingStars();
+      break;
+    default:
+      break;
+  }
+}
+
+function removeDynamicElements() {
+  dynamicElements.forEach(el => el.remove());
+  dynamicElements = [];
+}
+
+/* 8.1 Action: Particle Explosion */
+function addActionParticles() {
+  const bgAction = document.querySelector('.bg-action');
+  if (!bgAction) return;
+
+  for (let i = 0; i < 20; i++) {
+    const particle = document.createElement('div');
+    particle.classList.add('particle');
+    particle.style.left = `${Math.random() * 100}%`;
+    particle.style.top = `${Math.random() * 100}%`;
+    particle.style.animationDelay = `${Math.random() * 5}s`;
+    bgAction.appendChild(particle);
+    dynamicElements.push(particle);
+  }
+}
+
+/* 8.2 Calm: Parallax Clouds */
+function addCalmClouds() {
+  const bgCalm = document.querySelector('.bg-calm');
+  if (!bgCalm) return;
+
+  const clouds = document.createElement('div');
+  clouds.classList.add('clouds');
+  bgCalm.appendChild(clouds);
+  dynamicElements.push(clouds);
+}
+
+/* 8.3 Scary: Shadow Shapes */
+function addScaryShadows() {
+  const bgScary = document.querySelector('.bg-scary');
+  if (!bgScary) return;
+
+  for (let i = 0; i < 5; i++) {
+    const shadow = document.createElement('div');
+    shadow.classList.add('shadow');
+    shadow.style.left = `${Math.random() * 100}%`;
+    shadow.style.top = `${Math.random() * 100}%`;
+    shadow.style.animationDuration = `${10 + Math.random() * 10}s`;
+    bgScary.appendChild(shadow);
+    dynamicElements.push(shadow);
+  }
+}
+
+/* 8.4 Void: Shooting Stars */
+function addShootingStars() {
+  const bgVoid = document.querySelector('.bg-void');
+  if (!bgVoid) return;
+
+  for (let i = 0; i < 3; i++) {
+    const shootingStar = document.createElement('div');
+    shootingStar.classList.add('shooting-star');
+    shootingStar.style.left = `${Math.random() * 100}%`;
+    shootingStar.style.animationDelay = `${Math.random() * 10}s`;
+    bgVoid.appendChild(shootingStar);
+    dynamicElements.push(shootingStar);
+  }
+}
+
+/* ======================================================
+   9) Initialize with default environment if desired
+   ====================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  // Optionally, set a default environment, e.g., "Void"
+  pickEnvironment("Void");
+});
 </script>
 </body>
 </html>
