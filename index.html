@@ -872,114 +872,149 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
       const clock = new THREE.Clock();
       let currentModelIndex = -1; // Track current model
-const animationPaths = [
-    "BreakdanceFootworkToIdle.fbx",
-    "Capoeira.fbx",
-    "JoyfulJump.fbx",
-    "DancingTwerk.fbx",
-    "Shuffling.fbx",
-    "SillyDancing.fbx",
-    "Spinning.fbx",
-    "SittingDisbelief.fbx",
-    "Flair.fbx",
-    "WaveHipHopDance.fbx",
-    "HipHopDancing.fbx"
-];
+      const animationPaths = [
+        "BreakdanceFootworkToIdle.fbx",
+        "Capoeira.fbx",
+        "JoyfulJump.fbx",
+        "DancingTwerk.fbx",
+        "Shuffling.fbx",
+        "SillyDancing.fbx",
+        "Spinning.fbx",
+        "SittingDisbelief.fbx",
+        "Flair.fbx",
+        "WaveHipHopDance.fbx",
+        "HipHopDancing.fbx",
+      ];
 
       /* ======================================================
        7. Three.js Setup (with alpha => transparent background)
     ====================================================== */
-    let currentModelColor = new THREE.Color(0xffffff); // Default white color
+      let currentModelColor = new THREE.Color(0xffffff); // Default white color
+      // Load the texture
+      const textureLoader = new THREE.TextureLoader();
+      const texture = textureLoader.load("t1.png");
 
-    // Add this function to handle model loading
-    function loadRandomFBX(previousPosition = null) {
-    // Get a new random index different from the current one
-    let newIndex;
-    do {
-        newIndex = Math.floor(Math.random() * animationPaths.length);
-    } while (newIndex === currentModelIndex && animationPaths.length > 1);
-    
-    currentModelIndex = newIndex;
-    const modelPath = animationPaths[currentModelIndex];
+      function applyTextureToModel(model, texture) {
+  model.traverse((child) => {
+    if (child.isMesh) {
+      // Create a new material that preserves skinning
+      const newMaterial = new THREE.MeshStandardMaterial({
+        map: texture,
+        skinning: true, // Enable skinning for animations
+        morphTargets: true, // Enable morph targets if used
+        morphNormals: true // Enable morph normals if used
+      });
 
-    const loader = new THREE.FBXLoader();
-    loader.load(
-        modelPath,
-        (fbx) => {
+      // Copy important properties from the original material
+      if (child.material) {
+        // Preserve original material properties
+        newMaterial.wireframe = child.material.wireframe;
+        newMaterial.transparent = child.material.transparent;
+        newMaterial.opacity = child.material.opacity;
+        
+        // Copy animation-related properties
+        if (child.material.skinning) {
+          newMaterial.skinning = true;
+        }
+        if (child.material.morphTargets) {
+          newMaterial.morphTargets = true;
+        }
+        if (child.material.morphNormals) {
+          newMaterial.morphNormals = true;
+        }
+      }
+
+      // Assign the new material
+      child.material = newMaterial;
+    }
+  });
+}
+
+      // Add this function to handle model loading
+      function loadRandomFBX(previousPosition = null) {
+        // Get a new random index different from the current one
+        let newIndex;
+        do {
+          newIndex = Math.floor(Math.random() * animationPaths.length);
+        } while (newIndex === currentModelIndex && animationPaths.length > 1);
+
+        currentModelIndex = newIndex;
+        const modelPath = animationPaths[currentModelIndex];
+
+        const loader = new THREE.FBXLoader();
+        loader.load(
+          modelPath,
+          (fbx) => {
             if (model) {
-                // Store the current position if not provided
-                if (!previousPosition) {
-                    previousPosition = model.position.clone();
+              // Store the current position if not provided
+              if (!previousPosition) {
+                previousPosition = model.position.clone();
+              }
+
+
+              //add texture to the model
+              applyTextureToModel(model, texture);
+              // Clean up old model
+              scene.remove(model);
+              model.traverse((child) => {
+                if (child.isMesh) {
+                  child.geometry.dispose();
+                  child.material.dispose();
                 }
-                
-                // Store the current color before removing the old model
-                model.traverse((child) => {
-                    if (child.isMesh && child.material && child.material.color) {
-                        currentModelColor = child.material.color.clone();
-                        return; // Exit after getting the first mesh's color
-                    }
-                });
-                
-                // Clean up old model
-                scene.remove(model);
-                model.traverse((child) => {
-                    if (child.isMesh) {
-                        child.geometry.dispose();
-                        child.material.dispose();
-                    }
-                });
+              });
             }
 
             model = fbx;
             model.scale.set(1, 1, 1);
-            
+    
+
             // Set position to previous model's position or default
             if (previousPosition) {
-                model.position.copy(previousPosition);
+              model.position.copy(previousPosition);
             } else {
-                model.position.set(0, 0, 0);
+              model.position.set(0, 0, 0);
             }
+
             
-            // Apply the stored color to the new model
-            model.traverse((child) => {
-                if (child.isMesh) {
-                    if (Array.isArray(child.material)) {
-                        // Handle multi-material meshes
-                        child.material.forEach(mat => {
-                            mat.color = currentModelColor.clone();
-                        });
-                    } else {
-                        // Single material mesh
-                        child.material.color = currentModelColor.clone();
-                    }
-                }
-            });
-            
-            scene.add(model);
+
+            // // Apply texture to the model
+            // applyTextureToModel(model, texture);
+
+     
 
             // Setup animation mixer
             if (mixer) {
-                mixer.stopAllAction();
-                mixer.uncacheRoot(mixer.getRoot());
+              mixer.stopAllAction();
+              mixer.uncacheRoot(mixer.getRoot());
             }
             mixer = new THREE.AnimationMixer(model);
-            
+
             if (fbx.animations && fbx.animations.length > 0) {
-                fbx.animations.forEach((clip) => {
-                    mixer.clipAction(clip).play();
-                });
+              fbx.animations.forEach((clip) => {
+                mixer.clipAction(clip).play();
+              });
             } else {
-                console.warn("No animations found in the FBX model:", modelPath);
+              console.warn("No animations found in the FBX model:", modelPath);
             }
-        },
-        (xhr) => {
-            console.log(`${modelPath}: ${((xhr.loaded / xhr.total) * 100).toFixed(1)}% loaded`);
-        },
-        (error) => {
+             //add texture to the model
+             applyTextureToModel(model, texture);
+             scene.add(model);
+          },
+          (xhr) => {
+            
+            console.log(
+              `${modelPath}: ${((xhr.loaded / xhr.total) * 100).toFixed(
+                1
+              )}% loaded`
+            );
+          },
+          (error) => {
             console.error("Error loading FBX model:", error);
-        }
-    );
-}
+          }
+                 
+        );
+        
+      }
 
       initThree();
       animate(); // Start the animation loop
@@ -1012,7 +1047,7 @@ const animationPaths = [
 
         // **3.1 Remove OrbitControls to Lock Viewport**
         // OrbitControls are removed to prevent user interaction
- 
+
         loadRandomFBX();
 
         // **3.4 Lights**
@@ -1110,33 +1145,33 @@ const animationPaths = [
       /* ======================================================
        9. Bouncing Logic
     ====================================================== */
-    function onBounce() {
-    if (!model) return;
+      function onBounce() {
+        if (!model) return;
 
-    // Generate new random color
-    const randColor = new THREE.Color(Math.random() * 0xffffff);
-    
-    // Store the new color
-    currentModelColor = randColor.clone();
-    
-    // Apply the new color to all mesh materials
-    model.traverse((child) => {
-        if (child.isMesh && child.material) {
-            if (Array.isArray(child.material)) {
-                // Handle multi-material meshes
-                child.material.forEach(mat => {
-                    mat.color.copy(currentModelColor);
-                });
-            } else {
-                // Single material mesh
-                child.material.color.copy(currentModelColor);
-            }
-        }
-    });
+        // Generate new random color
+        const randColor = new THREE.Color(Math.random() * 0xffffff);
 
-    // Play bounce sound if not muted
-    playBounceSound();
-}
+        // Store the new color
+        currentModelColor = randColor.clone();
+
+        // // Apply the new color to all mesh materials
+        // model.traverse((child) => {
+        //   if (child.isMesh && child.material) {
+        //     if (Array.isArray(child.material)) {
+        //       // Handle multi-material meshes
+        //       child.material.forEach((mat) => {
+        //         mat.color.copy(currentModelColor);
+        //       });
+        //     } else {
+        //       // Single material mesh
+        //       child.material.color.copy(currentModelColor);
+        //     }
+        //   }
+        // });
+
+        // Play bounce sound if not muted
+        playBounceSound();
+      }
 
       function playBounceSound() {
         if (muted || !audioCtx || bounceBuffers.length === 0) return;
@@ -1284,21 +1319,20 @@ const animationPaths = [
       /* ======================================================
        12. Initialize with Default Environment
     ====================================================== */
-    // Add event listener for the new button
-document.addEventListener('DOMContentLoaded', () => {
-    const changeFbxBtn = document.getElementById('changeFbxBtn');
-    if (changeFbxBtn) {
-        changeFbxBtn.addEventListener('click', () => {
+      // Add event listener for the new button
+      document.addEventListener("DOMContentLoaded", () => {
+        const changeFbxBtn = document.getElementById("changeFbxBtn");
+        if (changeFbxBtn) {
+          changeFbxBtn.addEventListener("click", () => {
             if (model) {
-                const currentPosition = model.position.clone();
-                loadRandomFBX(currentPosition);
+              const currentPosition = model.position.clone();
+              loadRandomFBX(currentPosition);
             } else {
-                loadRandomFBX();
-
+              loadRandomFBX();
             }
-        });
-    }
-});
+          });
+        }
+      });
       document.addEventListener("DOMContentLoaded", () => {
         // Set a default environment, e.g., "Void"
         pickEnvironment("Void");
