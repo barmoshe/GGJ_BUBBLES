@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <!-- Ensure proper scaling on mobile devices -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AshaHi ScreenSaver with FBX Model - Improved</title>
+    <title>AshaHi ScreenSaver with FBX Model – Enhanced Environments</title>
     <style>
       /* ======================================================
        1. Global Styles and Resets
@@ -406,8 +406,153 @@
         }
       }
 
+      /* 2.5 Mystic: Enchanted Mystic Environment */
+      .bg-mystic {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: linear-gradient(135deg, #6a3093, #a044ff);
+        background-size: 200% 200%;
+        animation: mysticGradient 20s ease infinite;
+      }
+      @keyframes mysticGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .mystic-sparkles {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: radial-gradient(white 1px, transparent 1px);
+        background-size: 4px 4px;
+        opacity: 0.4;
+        animation: mysticSparkle 3s linear infinite;
+      }
+      @keyframes mysticSparkle {
+        0% {
+          opacity: 0.4;
+        }
+        50% {
+          opacity: 0.8;
+        }
+        100% {
+          opacity: 0.4;
+        }
+      }
+
+      /* 2.6 Neon: Futuristic Neon Environment */
+      .bg-neon {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: #000;
+      }
+      .bg-neon::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent 45%, rgba(57, 255, 20, 0.2) 45%, rgba(57, 255, 20, 0.2) 55%, transparent 55%),
+                    linear-gradient(135deg, transparent 45%, rgba(57, 255, 20, 0.2) 45%, rgba(57, 255, 20, 0.2) 55%, transparent 55%);
+        background-size: 50px 50px;
+        animation: neonGrid 10s linear infinite;
+        opacity: 0.8;
+      }
+      @keyframes neonGrid {
+        from {
+          transform: translate(0, 0);
+        }
+        to {
+          transform: translate(-50px, -50px);
+        }
+      }
+      .neon-flicker {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        background: rgba(57, 255, 20, 0.1);
+        mix-blend-mode: screen;
+        animation: neonFlicker 1.5s infinite;
+      }
+      @keyframes neonFlicker {
+        0%,
+        100% {
+          opacity: 0.5;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* 2.7 Forest: Tranquil Forest Environment */
+      .bg-forest {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 0;
+        background: linear-gradient(135deg, #154406, #3b7d3b);
+        background-size: 200% 200%;
+        animation: forestGradient 25s ease infinite;
+      }
+      @keyframes forestGradient {
+        0% {
+          background-position: 0% 50%;
+        }
+        50% {
+          background-position: 100% 50%;
+        }
+        100% {
+          background-position: 0% 50%;
+        }
+      }
+      .leaf {
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj48cGF0aCBmaWxsPSIjOEI0NTEzIiBkPSJNNTAgMCBDMjAgMjAsIDIwIDgwLDUwIDEwMCBDODAgODAsIDgwIDIwLDUwIDBaIi8+PC9zdmc+") no-repeat center center;
+        background-size: contain;
+        pointer-events: none;
+        animation: fallLeaf 10s linear infinite;
+      }
+      @keyframes fallLeaf {
+        0% {
+          transform: translateY(-50px) rotate(0deg);
+          opacity: 0;
+        }
+        10% {
+          opacity: 1;
+        }
+        100% {
+          transform: translateY(100vh) rotate(360deg);
+          opacity: 0;
+        }
+      }
+
       /* ======================================================
-       3. Overlay for Environment Selection
+       3. Overlay for Environment Selection & UI Enhancements
       ====================================================== */
       #audioChoiceOverlay {
         position: fixed;
@@ -434,7 +579,9 @@
         flex-direction: column;
         gap: 24px;
         padding: 32px 40px;
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 12px;
         width: 400px;
         max-width: 90%;
@@ -460,6 +607,13 @@
         transform: scale(1.05);
         outline: none;
       }
+      /* Add new environment buttons */
+      #audioChoiceOverlay .panel .env-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        justify-content: center;
+      }
 
       /* ======================================================
        4. Bottom-Right Controls Panel
@@ -472,7 +626,8 @@
         flex-wrap: wrap;
         align-items: center;
         gap: 16px;
-        background: rgba(0, 0, 0, 0.5);
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(5px);
         padding: 14px 20px;
         border-radius: 10px;
         z-index: 9999;
@@ -553,13 +708,14 @@
     <div id="audioChoiceOverlay">
       <div class="panel">
         <p style="margin: 0; font-size: 1.3em;">Pick Your Environment:</p>
-        <div
-          style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;"
-        >
+        <div class="env-buttons">
           <button id="envActionBtn">Action</button>
           <button id="envCalmBtn">Calm</button>
           <button id="envScaryBtn">Scary</button>
           <button id="envVoidBtn">Void</button>
+          <button id="envMysticBtn">Mystic</button>
+          <button id="envNeonBtn">Neon</button>
+          <button id="envForestBtn">Forest</button>
         </div>
         <p style="font-size: 1em; opacity: 0.8; margin-top: 12px">
           (Recommended with audio)
@@ -601,7 +757,7 @@
       let bounceBuffers = [];
       const bounceSFX = ["fall1.wav", "fall2.wav", "fall3.wav"];
 
-      // Our environment configurations
+      // Environment configurations (now 7 total)
       const environments = {
         Action: {
           bgClass: "bg-action",
@@ -622,6 +778,21 @@
           bgClass: "bg-void",
           music: null,
           speed: 0.0,
+        },
+        Mystic: {
+          bgClass: "bg-mystic",
+          music: "mystic.wav",
+          speed: 0.3,
+        },
+        Neon: {
+          bgClass: "bg-neon",
+          music: "neon.wav",
+          speed: 0.8,
+        },
+        Forest: {
+          bgClass: "bg-forest",
+          music: "forest.wav",
+          speed: 0.4,
         },
       };
 
@@ -648,6 +819,15 @@
       );
       document.getElementById("envVoidBtn").addEventListener("click", () =>
         pickEnvironment("Void")
+      );
+      document.getElementById("envMysticBtn").addEventListener("click", () =>
+        pickEnvironment("Mystic")
+      );
+      document.getElementById("envNeonBtn").addEventListener("click", () =>
+        pickEnvironment("Neon")
+      );
+      document.getElementById("envForestBtn").addEventListener("click", () =>
+        pickEnvironment("Forest")
       );
 
       let speedIntervalId = null;
@@ -680,7 +860,7 @@
           currentBgAudio = null;
         }
 
-        // 4. Initialize Web Audio for bounce SFX if not done already
+        // 4. Initialize Web Audio for bounce SFX if not already done
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           loadBounceSFX();
@@ -852,7 +1032,6 @@
           (fbx) => {
             if (model) {
               if (!previousPosition) previousPosition = model.position.clone();
-              // Clean up old model
               scene.remove(model);
               model.traverse((child) => {
                 if (child.isMesh) {
@@ -980,7 +1159,6 @@
       }
 
       function onBounce() {
-        // (Color-change effect removed for clarity)
         playBounceSound();
       }
 
@@ -1014,6 +1192,15 @@
           case "Void":
             addShootingStars();
             break;
+          case "Mystic":
+            addMysticSparkles();
+            break;
+          case "Neon":
+            addNeonFlicker();
+            break;
+          case "Forest":
+            addFallingLeaves();
+            break;
           default:
             break;
         }
@@ -1026,12 +1213,10 @@
       function addActionParticles() {
         const bgAction = document.querySelector(".bg-action");
         if (!bgAction) return;
-        // Add an extra fire layer element
         const fireLayer = document.createElement("div");
         fireLayer.classList.add("fire-layer");
         bgAction.appendChild(fireLayer);
         dynamicElements.push(fireLayer);
-        // Create particles
         for (let i = 0; i < 30; i++) {
           const particle = document.createElement("div");
           particle.classList.add("particle");
@@ -1050,7 +1235,6 @@
           bgAction.appendChild(particle);
           dynamicElements.push(particle);
         }
-        // Add glow effect
         const glow = document.createElement("div");
         glow.classList.add("glow");
         bgAction.appendChild(glow);
@@ -1103,6 +1287,40 @@
         dynamicElements.push(mist);
       }
 
+      function addMysticSparkles() {
+        const bgMystic = document.querySelector(".bg-mystic");
+        if (!bgMystic) return;
+        const sparkles = document.createElement("div");
+        sparkles.classList.add("mystic-sparkles");
+        bgMystic.appendChild(sparkles);
+        dynamicElements.push(sparkles);
+      }
+
+      function addNeonFlicker() {
+        const bgNeon = document.querySelector(".bg-neon");
+        if (!bgNeon) return;
+        const neonDiv = document.createElement("div");
+        neonDiv.classList.add("neon-flicker");
+        bgNeon.appendChild(neonDiv);
+        dynamicElements.push(neonDiv);
+      }
+
+      function addFallingLeaves() {
+        const bgForest = document.querySelector(".bg-forest");
+        if (!bgForest) return;
+        // Add several leaves at random positions
+        for (let i = 0; i < 10; i++) {
+          const leaf = document.createElement("div");
+          leaf.classList.add("leaf");
+          leaf.style.left = `${Math.random() * 100}%`;
+          leaf.style.top = `${-Math.random() * 100}px`;
+          leaf.style.animationDelay = `${Math.random() * 5}s`;
+          leaf.style.animationDuration = `${8 + Math.random() * 5}s`;
+          bgForest.appendChild(leaf);
+          dynamicElements.push(leaf);
+        }
+      }
+
       function adjustCurrentVelocityScale() {
         const scale = getSpeedScale();
         velocity.set(
@@ -1116,7 +1334,7 @@
        8. Initialize on DOMContentLoaded
       ====================================================== */
       document.addEventListener("DOMContentLoaded", () => {
-        // Set a default environment and initialize the change FBX button listener
+        // Set a default environment (e.g., "Void") and initialize the change FBX button listener
         pickEnvironment("Void");
         const changeFbxBtn = document.getElementById("changeFbxBtn");
         if (changeFbxBtn) {
