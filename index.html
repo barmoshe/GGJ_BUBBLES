@@ -2,29 +2,31 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>AshaHi ScreenSaver with FBX Model</title>
+    <!-- Ensure proper scaling on mobile devices -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AshaHi ScreenSaver with FBX Model - Improved</title>
     <style>
       /* ======================================================
        1. Global Styles and Resets
-    ====================================================== */
+      ====================================================== */
       html,
       body {
         margin: 0;
         padding: 0;
         width: 100%;
         height: 100%;
-        background: #000; /* Overridden by chosen environment class */
+        background: #000;
         overflow: hidden;
-        transition: background 1s ease; /* Smooth transition when changing backgrounds */
+        transition: background 1s ease;
         position: relative;
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif; /* Modern and clean font */
-        color: #fff; /* Default text color */
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        color: #fff;
       }
       #container {
         width: 100%;
         height: 100%;
         position: relative;
-        z-index: 1; /* Ensure it stays above the animated backgrounds */
+        z-index: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -33,9 +35,9 @@
 
       /* ======================================================
        2. Environment Backgrounds
-    ====================================================== */
+      ====================================================== */
 
-      /* 2.1 Action: Advanced Animated Fire Effect with Multiple Layers and Enhanced Particles */
+      /* 2.1 Action: Advanced Animated Fire Effect */
       .bg-action {
         position: fixed;
         top: 0;
@@ -46,11 +48,9 @@
         z-index: 0;
         background: #000;
       }
-
-      /* Fire Layers */
+      /* Two pseudo–elements for two fire layers */
       .bg-action::before,
-      .bg-action::after,
-      .bg-action::nth-child(3) {
+      .bg-action::after {
         content: "";
         position: absolute;
         width: 200%;
@@ -67,17 +67,28 @@
         opacity: 0.5;
         mix-blend-mode: multiply;
       }
-
       .bg-action::after {
         animation-delay: 1.5s;
         opacity: 0.3;
       }
-
-      .bg-action::nth-child(3) {
-        animation-delay: 0.75s;
+      /* Third fire layer added via element (see addActionParticles) */
+      .bg-action .fire-layer {
+        position: absolute;
+        width: 200%;
+        height: 200%;
+        top: -50%;
+        left: -50%;
+        background: radial-gradient(
+          circle at 50% 50%,
+          rgba(255, 140, 0, 0.6),
+          rgba(255, 87, 34, 0.4),
+          rgba(255, 0, 0, 0.2)
+        );
+        animation: fireFlame 3s infinite ease-in-out;
         opacity: 0.4;
+        mix-blend-mode: multiply;
+        animation-delay: 0.75s;
       }
-
       @keyframes fireFlame {
         0% {
           transform: scale(1) translateY(0px);
@@ -107,9 +118,8 @@
         border-radius: 50%;
         opacity: 0;
         animation: particleBurst 2s infinite;
-        pointer-events: none; /* Ensure particles don't interfere with UI */
+        pointer-events: none;
       }
-
       @keyframes particleBurst {
         0% {
           transform: translate(0, 0) scale(1);
@@ -119,8 +129,7 @@
           opacity: 1;
         }
         100% {
-          transform: translate(var(--translate-x), var(--translate-y))
-            scale(0.5);
+          transform: translate(var(--translate-x), var(--translate-y)) scale(0.5);
           opacity: 0;
         }
       }
@@ -144,7 +153,6 @@
         mix-blend-mode: screen;
         pointer-events: none;
       }
-
       @keyframes glowPulse {
         0%,
         100% {
@@ -170,7 +178,6 @@
         background-size: 400% 400%;
         animation: calmGradient 15s ease infinite;
       }
-
       @keyframes calmGradient {
         0% {
           background-position: 0% 50%;
@@ -182,8 +189,6 @@
           background-position: 0% 50%;
         }
       }
-
-      /* Parallax Clouds */
       .bg-calm .clouds {
         position: absolute;
         top: 0;
@@ -196,7 +201,6 @@
         opacity: 0.3;
         transform: scale(1.5);
       }
-
       @keyframes moveClouds {
         from {
           transform: translateX(0) scale(1.5);
@@ -206,7 +210,7 @@
         }
       }
 
-      /* 2.3 Scary: Enhanced Flickering with Shadow Shapes */
+      /* 2.3 Scary: Enhanced Flickering with Shadow Shapes and Eerie Mist */
       .bg-scary {
         position: fixed;
         top: 0;
@@ -220,10 +224,9 @@
           #1a0000,
           #330000,
           #1a0000
-        ); /* Deep red hues */
+        );
         animation: scaryBackgroundPulse 10s ease infinite;
       }
-
       @keyframes scaryBackgroundPulse {
         0%,
         100% {
@@ -243,7 +246,6 @@
           );
         }
       }
-
       .bg-scary::before {
         content: "";
         position: absolute;
@@ -254,11 +256,10 @@
           rgba(255, 0, 0, 0.5),
           rgba(0, 100, 0, 0.3)
         );
-        opacity: 0.7; /* Increased opacity for a denser look */
+        opacity: 0.7;
         animation: scaryFlicker 3s infinite;
         mix-blend-mode: overlay;
       }
-
       @keyframes scaryFlicker {
         0%,
         100% {
@@ -272,20 +273,17 @@
           opacity: 1;
         }
       }
-
-      /* Enhanced Shadow Shapes */
       .bg-scary .shadow {
         position: absolute;
-        width: 80px; /* Reduced size for more shadows */
+        width: 80px;
         height: 80px;
-        background: rgba(0, 0, 0, 0.5); /* Darker shadows */
+        background: rgba(0, 0, 0, 0.5);
         border-radius: 50%;
         top: 20%;
         left: 30%;
-        filter: blur(30px); /* Increased blur for a ghostly effect */
+        filter: blur(30px);
         animation: moveShadow 8s infinite alternate;
       }
-
       .bg-scary .shadow::after {
         content: "";
         position: absolute;
@@ -295,7 +293,6 @@
         border-radius: inherit;
         animation: scaleShadow 8s infinite alternate;
       }
-
       @keyframes moveShadow {
         from {
           transform: translate(0, 0);
@@ -304,7 +301,6 @@
           transform: translate(150px, -150px);
         }
       }
-
       @keyframes scaleShadow {
         from {
           transform: scale(1);
@@ -313,18 +309,16 @@
           transform: scale(1.3);
         }
       }
-
-      /* Additional Eerie Elements */
       .bg-scary .eerie-mist {
         position: absolute;
         width: 100%;
         height: 100%;
-        background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMTAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDUwQzIwLjg3NyA1MCAzMi43NjMgNDYuNTY5IDQ0LjIzOSA0MCA1NS44NTMgMzEuNDY3IDM3LjQ4OCAxMjQuNjk5IDM3LjQ4OCAxMjQuNjk5QzM3LjQ4OCAxMjQuNjk5IDc1LjA4OSA0Ny4zMTMgNzUuMDg5IDQ3LjMxM0M3NS4wODkgNDcuMzEzIDk4LjI0OCA0Ni41NjkgMTAwIDUwWiIgZmlsbD0iI2ZmZiIgLz48L3N2Zz4=");
+        background: url("data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjUwIiB2aWV3Qm94PSIwIDAgMTAwIDUwIiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxwYXRoIGQ9Ik0wIDUwQzIwLjg3NyA1MCAzMi43NjMgNDYuNTY5IDQ0LjIzOSA0MCA1NS44NTMgMzEuNDY3IDM3LjQ4OCAxMjQuNjk5IDM3LjQ4OCAxMjQuNjk5QzM3LjQ4OCAxMjQuNjk5IDc1LjA4OSA0Ny4zMTMgNzUuMDg5IDQ3LjMxM0M3NS4wODkgNDcuMzEzIDk4LjI0OCA0Ni41NjkgMTAwIDUwWiIgZmlsbD0iI2ZmZiIgLz48L3N2Zz4=")
+          no-repeat center center;
         opacity: 0.3;
         animation: mistMove 10s linear infinite;
         pointer-events: none;
       }
-
       @keyframes mistMove {
         from {
           transform: translateX(-100px) translateY(-50px) scale(1);
@@ -336,7 +330,7 @@
         }
       }
 
-      /* 2.4 Void: Enhanced Voidish Vibes */
+      /* 2.4 Void: Enhanced Voidish Vibes with Starfield */
       .bg-void {
         position: fixed;
         top: 0;
@@ -352,10 +346,8 @@
           #0f3460,
           #0f2027
         );
-        /* Deep space colors */
         animation: voidGradient 20s ease infinite;
       }
-
       @keyframes voidGradient {
         0% {
           background-position: 0% 50%;
@@ -367,8 +359,6 @@
           background-position: 0% 50%;
         }
       }
-
-      /* Starfield Background */
       .bg-void::before {
         content: "";
         position: absolute;
@@ -378,9 +368,8 @@
           radial-gradient(white 1px, transparent 1px);
         background-size: 3px 3px;
         animation: starfieldMove 60s linear infinite;
-        opacity: 0.8; /* Increased opacity for more stars */
+        opacity: 0.8;
       }
-
       @keyframes starfieldMove {
         from {
           background-position: 0 0, 0 0;
@@ -389,12 +378,10 @@
           background-position: 100px 100px, -100px 100px;
         }
       }
-
-      /* Shooting Stars */
       .bg-void .shooting-star {
         position: absolute;
         width: 2px;
-        height: 150px; /* Longer shooting stars for a more dramatic effect */
+        height: 150px;
         background: linear-gradient(white, rgba(255, 255, 255, 0));
         top: 0;
         left: 0;
@@ -402,7 +389,6 @@
         transform: rotate(45deg);
         animation: shootingStar 7s infinite;
       }
-
       @keyframes shootingStar {
         0% {
           transform: translate(0, 0) rotate(45deg);
@@ -422,7 +408,7 @@
 
       /* ======================================================
        3. Overlay for Environment Selection
-    ====================================================== */
+      ====================================================== */
       #audioChoiceOverlay {
         position: fixed;
         top: 0;
@@ -432,12 +418,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: rgba(
-          0,
-          0,
-          0,
-          0.85
-        ); /* Darker overlay for better contrast */
+        background: rgba(0, 0, 0, 0.85);
         color: #fff;
         font-size: 1.2em;
         text-align: center;
@@ -451,58 +432,52 @@
       #audioChoiceOverlay .panel {
         display: flex;
         flex-direction: column;
-        gap: 24px; /* Increased gap for better spacing */
-        padding: 32px 40px; /* Increased padding for spaciousness */
+        gap: 24px;
+        padding: 32px 40px;
         background: rgba(255, 255, 255, 0.1);
-        border-radius: 12px; /* More pronounced border radius */
+        border-radius: 12px;
         width: 400px;
         max-width: 90%;
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5); /* Enhanced shadow for depth */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
       }
       #audioChoiceOverlay button {
         cursor: pointer;
         font-size: 16px;
-        padding: 14px 24px; /* Increased padding for better touch targets */
+        padding: 14px 24px;
         border: none;
-        border-radius: 8px; /* Rounded corners */
+        border-radius: 8px;
         background: rgba(0, 0, 0, 0.5);
         color: #fff;
         transition: background 0.3s ease, transform 0.2s ease;
         width: 100%;
         max-width: 220px;
         align-self: center;
-        font-weight: bold; /* Bold text for emphasis */
+        font-weight: bold;
       }
       #audioChoiceOverlay button:hover,
       #audioChoiceOverlay button:focus {
         background: rgba(0, 0, 0, 0.7);
-        transform: scale(1.05); /* Subtle scaling on hover */
-        outline: none; /* Remove default outline */
+        transform: scale(1.05);
+        outline: none;
       }
 
       /* ======================================================
        4. Bottom-Right Controls Panel
-    ====================================================== */
+      ====================================================== */
       #controlsOverlay {
         position: fixed;
         bottom: 20px;
         right: 20px;
         display: flex;
-        flex-wrap: wrap; /* Allows wrapping on smaller screens */
+        flex-wrap: wrap;
         align-items: center;
         gap: 16px;
-        background: rgba(
-          0,
-          0,
-          0,
-          0.5
-        ); /* Darker background for better contrast */
+        background: rgba(0, 0, 0, 0.5);
         padding: 14px 20px;
         border-radius: 10px;
         z-index: 9999;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5); /* Enhanced shadow for depth */
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
       }
-      /* Shared button style */
       .button {
         display: inline-flex;
         align-items: center;
@@ -520,17 +495,16 @@
       .button:hover,
       .button:focus {
         background: rgba(255, 255, 255, 0.25);
-        transform: scale(1.05); /* Subtle scaling on hover */
-        outline: none; /* Remove default outline */
+        transform: scale(1.05);
+        outline: none;
       }
       #muteBtn span {
-        font-size: 20px; /* Larger icon for better visibility */
+        font-size: 20px;
       }
 
       /* ======================================================
        5. Responsive Design Enhancements
-    ====================================================== */
-      /* Mobile Styles */
+      ====================================================== */
       @media screen and (max-width: 768px) {
         #controlsOverlay {
           bottom: 10px;
@@ -545,7 +519,6 @@
         #muteBtn span {
           font-size: 18px;
         }
-        /* Adjust environment overlay for smaller screens */
         #audioChoiceOverlay .panel {
           padding: 20px 24px;
           gap: 20px;
@@ -579,14 +552,9 @@
     <!-- Fullscreen overlay for environment choice -->
     <div id="audioChoiceOverlay">
       <div class="panel">
-        <p style="margin: 0; font-size: 1.3em">Pick Your Environment:</p>
+        <p style="margin: 0; font-size: 1.3em;">Pick Your Environment:</p>
         <div
-          style="
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            flex-wrap: wrap;
-          "
+          style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;"
         >
           <button id="envActionBtn">Action</button>
           <button id="envCalmBtn">Calm</button>
@@ -598,6 +566,7 @@
         </p>
       </div>
     </div>
+    <!-- Bottom-right controls panel -->
     <div id="controlsOverlay">
       <button id="changeEnvBtn" class="button">Change Environment</button>
       <button id="changeFbxBtn" class="button">
@@ -610,146 +579,123 @@
       </button>
     </div>
 
-    <script src="
-https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
-"></script>
-
-    <!-- Three.js (r128 for FBXLoader compatibility) -->
+    <!-- ======================================================
+         External Libraries
+    ====================================================== -->
+    <script src="https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <!-- FBXLoader -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/FBXLoader.js"></script>
-    <!-- Inflate (required by FBXLoader for compressed files) -->
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/libs/inflate.min.js"></script>
 
     <script>
       /* ======================================================
        1. Global Variables
-    ====================================================== */
+      ====================================================== */
       let scene, camera, renderer, model, mixer;
-      let velocity = new THREE.Vector2(0.05, 0.05); // Reduced speed to prevent frequent bounces
-      // Removed spinDirection as FBX animations may handle rotation
-      // let spinDirection = new THREE.Vector3(0.02, 0.02, 0.02);
-
+      let velocity = new THREE.Vector2(0.05, 0.05);
       const BASE_HALF_HEIGHT = 30;
-      const MODEL_RADIUS = 10; // Increased to accommodate larger model
-
-      let currentBgAudio = null; // HTMLAudio for background
+      const MODEL_RADIUS = 10;
+      let currentBgAudio = null;
       let muted = false;
-
-      // Web Audio for bounce SFX
       let audioCtx = null;
       let bounceBuffers = [];
-      const bounceSFX = ["fall1.wav", "fall2.wav", "fall3.wav"]; // Ensure these files are correctly placed
+      const bounceSFX = ["fall1.wav", "fall2.wav", "fall3.wav"];
 
-      /* Our environments: class + optional music track */
+      // Our environment configurations
       const environments = {
         Action: {
           bgClass: "bg-action",
-          music: "bg_music2.wav", // Ensure this file is correctly placed
-          speed: 0.65, // Faster speed for Action
+          music: "bg_music2.wav",
+          speed: 0.65,
         },
         Calm: {
           bgClass: "bg-calm",
-          music: "BG_loop.wav", // Ensure this file is correctly placed
-          speed: 0.2, // Slower speed for Calm
+          music: "BG_loop.wav",
+          speed: 0.2,
         },
         Scary: {
           bgClass: "bg-scary",
-          music: "33.wav", // Ensure this file is correctly placed
-          speed: null, // Speed handled dynamically for Scary
+          music: "33.wav",
+          speed: null,
         },
         Void: {
           bgClass: "bg-void",
-          music: null, // No background music for Void
-          speed: 0.0, // Default speed for Void
+          music: null,
+          speed: 0.0,
         },
       };
 
-      /* ======================================================
-       2. Speed Scaling Based on Screen Width
-    ====================================================== */
       function getSpeedScale() {
         const baseWidth = 1920;
         const minScale = 0.4;
         const maxScale = 1.0;
         const currentWidth = window.innerWidth;
-        const scale = Math.min(
-          Math.max(currentWidth / baseWidth, minScale),
-          maxScale
-        );
-        return scale;
+        return Math.min(Math.max(currentWidth / baseWidth, minScale), maxScale);
       }
-
       let previousScale = getSpeedScale();
 
       /* ======================================================
-       3. Environment Selection
-    ====================================================== */
-      document
-        .getElementById("envActionBtn")
-        .addEventListener("click", () => pickEnvironment("Action"));
-      document
-        .getElementById("envCalmBtn")
-        .addEventListener("click", () => pickEnvironment("Calm"));
-      document
-        .getElementById("envScaryBtn")
-        .addEventListener("click", () => pickEnvironment("Scary"));
-      document
-        .getElementById("envVoidBtn")
-        .addEventListener("click", () => pickEnvironment("Void"));
+       2. Environment Selection
+      ====================================================== */
+      document.getElementById("envActionBtn").addEventListener("click", () =>
+        pickEnvironment("Action")
+      );
+      document.getElementById("envCalmBtn").addEventListener("click", () =>
+        pickEnvironment("Calm")
+      );
+      document.getElementById("envScaryBtn").addEventListener("click", () =>
+        pickEnvironment("Scary")
+      );
+      document.getElementById("envVoidBtn").addEventListener("click", () =>
+        pickEnvironment("Void")
+      );
 
-      let speedIntervalId = null; // To manage speed changes in Scary environment
-
+      let speedIntervalId = null;
       async function pickEnvironment(envKey) {
         const env = environments[envKey];
         if (!env) return;
 
-        // 1. Stop current background audio
+        // 1. Stop current background audio and clear dynamic elements
         stopCurrentBG();
 
-        // 2. Remove existing environment classes
-        document.body.classList.remove(
-          ...Object.values(environments).map((e) => e.bgClass)
+        // 2. Remove all environment classes and add the new one
+        Object.values(environments).forEach((e) =>
+          document.body.classList.remove(e.bgClass)
         );
-
-        // 3. Add new environment class
         document.body.classList.add(env.bgClass);
 
-        // 4. Play new background music if available
+        // 3. Play background music if available
         if (env.music) {
           currentBgAudio = new Audio(env.music);
           currentBgAudio.loop = true;
           currentBgAudio.volume = 0.5;
           currentBgAudio.muted = muted;
-          currentBgAudio.setAttribute("playsinline", ""); // For iOS
+          currentBgAudio.setAttribute("playsinline", "");
           try {
             await currentBgAudio.play();
           } catch (err) {
             console.warn("Audio play blocked:", err);
           }
         } else {
-          // "Void" => no background track
           currentBgAudio = null;
         }
 
-        // 5. Initialize Web Audio for bounce SFX if not done
+        // 4. Initialize Web Audio for bounce SFX if not done already
         if (!audioCtx) {
           audioCtx = new (window.AudioContext || window.webkitAudioContext)();
           loadBounceSFX();
         }
 
-        // 6. Hide environment selection overlay
+        // 5. Hide the environment overlay
         hideEnvironmentOverlay();
 
-        // 7. Add environment-specific dynamic elements
+        // 6. Add dynamic elements specific to the environment
         addDynamicElements(envKey);
 
-        // 8. Adjust speed based on environment
+        // 7. Adjust speed based on environment
         if (envKey === "Scary") {
-          // Handle Scary environment speed separately
           startScarySpeedChanges();
         } else {
-          // Clear any existing speed intervals
           if (speedIntervalId) {
             clearInterval(speedIntervalId);
             speedIntervalId = null;
@@ -761,14 +707,10 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       function stopCurrentBG() {
         if (currentBgAudio) {
           currentBgAudio.pause();
-          currentBgAudio.src = ""; // Release the audio element
+          currentBgAudio.src = "";
           currentBgAudio = null;
         }
-
-        // Remove dynamic elements specific to the previous environment
         removeDynamicElements();
-
-        // Clear any existing speed intervals
         if (speedIntervalId) {
           clearInterval(speedIntervalId);
           speedIntervalId = null;
@@ -781,11 +723,11 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
           overlay.classList.add("hidden");
           setTimeout(() => {
             overlay.style.display = "none";
-          }, 500); // Match the CSS transition duration
+          }, 500);
         }
       }
 
-      /* Pre-fetch & decode bounce SFX into AudioBuffers */
+      /* Pre-fetch and decode bounce SFX into AudioBuffers */
       async function loadBounceSFX() {
         const buffers = [];
         for (const url of bounceSFX) {
@@ -802,12 +744,11 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
 
       /* ======================================================
-       4. "Change Environment" Button
-    ====================================================== */
+       3. "Change Environment" Button
+      ====================================================== */
       document.getElementById("changeEnvBtn").addEventListener("click", () => {
         showEnvironmentOverlay();
       });
-
       function showEnvironmentOverlay() {
         const overlay = document.getElementById("audioChoiceOverlay");
         if (overlay) {
@@ -817,8 +758,8 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
 
       /* ======================================================
-       5. Mute / Unmute Functionality
-    ====================================================== */
+       4. Mute / Unmute Functionality
+      ====================================================== */
       document.getElementById("muteBtn").addEventListener("click", () => {
         muted = !muted;
         if (currentBgAudio) {
@@ -826,7 +767,6 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
         }
         updateMuteUI();
       });
-
       function updateMuteUI() {
         const muteIcon = document.getElementById("muteIcon");
         const muteLabel = document.getElementById("muteLabel");
@@ -840,38 +780,28 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
 
       /* ======================================================
-       6. Dynamic Speed Adjustment Based on Environment
-    ====================================================== */
+       5. Dynamic Speed Adjustment Based on Environment
+      ====================================================== */
       function setEnvironmentSpeed(envSpeed) {
         const scale = getSpeedScale();
         velocity.set(envSpeed * scale, envSpeed * scale);
       }
-
-      /* Function to start random speed changes for Scary environment */
       function startScarySpeedChanges() {
-        // Clear any existing interval just in case
-        if (speedIntervalId) {
-          clearInterval(speedIntervalId);
-        }
-
-        // Initial random speed
+        if (speedIntervalId) clearInterval(speedIntervalId);
         setRandomVelocity();
-
-        // Set interval to change speed every 0.2 seconds
         speedIntervalId = setInterval(setRandomVelocity, 200);
       }
-
-      /* Function to set random velocity */
       function setRandomVelocity() {
-        const minSpeed = -1.0;
-        const maxSpeed = 1.0;
+        const minSpeed = -1.0,
+          maxSpeed = 1.0;
         const randomX = Math.random() * (maxSpeed - minSpeed) + minSpeed;
         const randomY = Math.random() * (maxSpeed - minSpeed) + minSpeed;
         const scale = getSpeedScale();
         velocity.set(randomX * scale, randomY * scale);
       }
+
       const clock = new THREE.Clock();
-      let currentModelIndex = -1; // Track current model
+      let currentModelIndex = -1;
       const animationPaths = [
         "BreakdanceFootworkToIdle.fbx",
         "Capoeira.fbx",
@@ -887,73 +817,41 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       ];
 
       /* ======================================================
-       7. Three.js Setup (with alpha => transparent background)
-    ====================================================== */
-      let currentModelColor = new THREE.Color(0xffffff); // Default white color
-      // Load the texture
+       6. Three.js Setup and FBX Model Loading
+      ====================================================== */
+      let currentModelColor = new THREE.Color(0xffffff);
       const textureLoader = new THREE.TextureLoader();
       const texture = textureLoader.load("t1.png");
-
       function applyTextureToModel(model, texture) {
-  model.traverse((child) => {
-    if (child.isMesh) {
-      // Create a new material that preserves skinning
-      const newMaterial = new THREE.MeshStandardMaterial({
-        map: texture,
-        skinning: true, // Enable skinning for animations
-        morphTargets: true, // Enable morph targets if used
-        morphNormals: true // Enable morph normals if used
-      });
-
-      // Copy important properties from the original material
-      if (child.material) {
-        // Preserve original material properties
-        newMaterial.wireframe = child.material.wireframe;
-        newMaterial.transparent = child.material.transparent;
-        newMaterial.opacity = child.material.opacity;
-        
-        // Copy animation-related properties
-        if (child.material.skinning) {
-          newMaterial.skinning = true;
-        }
-        if (child.material.morphTargets) {
-          newMaterial.morphTargets = true;
-        }
-        if (child.material.morphNormals) {
-          newMaterial.morphNormals = true;
-        }
+        model.traverse((child) => {
+          if (child.isMesh) {
+            const newMaterial = new THREE.MeshStandardMaterial({
+              map: texture,
+              skinning: true,
+              morphTargets: true,
+              morphNormals: true,
+              wireframe: child.material?.wireframe || false,
+              transparent: child.material?.transparent || false,
+              opacity: child.material?.opacity || 1,
+            });
+            child.material = newMaterial;
+          }
+        });
       }
 
-      // Assign the new material
-      child.material = newMaterial;
-    }
-  });
-}
-
-      // Add this function to handle model loading
       function loadRandomFBX(previousPosition = null) {
-        // Get a new random index different from the current one
         let newIndex;
         do {
           newIndex = Math.floor(Math.random() * animationPaths.length);
         } while (newIndex === currentModelIndex && animationPaths.length > 1);
-
         currentModelIndex = newIndex;
         const modelPath = animationPaths[currentModelIndex];
-
         const loader = new THREE.FBXLoader();
         loader.load(
           modelPath,
           (fbx) => {
             if (model) {
-              // Store the current position if not provided
-              if (!previousPosition) {
-                previousPosition = model.position.clone();
-              }
-
-
-              //add texture to the model
-              applyTextureToModel(model, texture);
+              if (!previousPosition) previousPosition = model.position.clone();
               // Clean up old model
               scene.remove(model);
               model.traverse((child) => {
@@ -963,32 +861,18 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
                 }
               });
             }
-
             model = fbx;
             model.scale.set(1, 1, 1);
-    
-
-            // Set position to previous model's position or default
             if (previousPosition) {
               model.position.copy(previousPosition);
             } else {
               model.position.set(0, 0, 0);
             }
-
-            
-
-            // // Apply texture to the model
-            // applyTextureToModel(model, texture);
-
-     
-
-            // Setup animation mixer
             if (mixer) {
               mixer.stopAllAction();
               mixer.uncacheRoot(mixer.getRoot());
             }
             mixer = new THREE.AnimationMixer(model);
-
             if (fbx.animations && fbx.animations.length > 0) {
               fbx.animations.forEach((clip) => {
                 mixer.clipAction(clip).play();
@@ -996,38 +880,28 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             } else {
               console.warn("No animations found in the FBX model:", modelPath);
             }
-             //add texture to the model
-             applyTextureToModel(model, texture);
-             scene.add(model);
+            applyTextureToModel(model, texture);
+            scene.add(model);
           },
           (xhr) => {
-            
             console.log(
-              `${modelPath}: ${((xhr.loaded / xhr.total) * 100).toFixed(
-                1
-              )}% loaded`
+              `${modelPath}: ${((xhr.loaded / xhr.total) * 100).toFixed(1)}% loaded`
             );
           },
           (error) => {
             console.error("Error loading FBX model:", error);
           }
-                 
         );
-        
       }
 
       initThree();
-      animate(); // Start the animation loop
-
-      /* Initialize Clock Outside Animate Loop */
+      animate();
 
       function initThree() {
         scene = new THREE.Scene();
-
         const w = window.innerWidth;
         const h = window.innerHeight;
         const aspect = w / h;
-
         camera = new THREE.OrthographicCamera(
           -BASE_HALF_HEIGHT * aspect,
           BASE_HALF_HEIGHT * aspect,
@@ -1036,21 +910,15 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
           1,
           1000
         );
-        camera.position.set(0, 0, 100); // Adjusted to center the model
+        camera.position.set(0, 0, 100);
         camera.lookAt(0, 0, 0);
-
-        // Transparent renderer so body background is visible
         renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setClearColor(0x000000, 0);
         renderer.setSize(w, h);
         document.getElementById("container").appendChild(renderer.domElement);
 
-        // **3.1 Remove OrbitControls to Lock Viewport**
-        // OrbitControls are removed to prevent user interaction
-
         loadRandomFBX();
 
-        // **3.4 Lights**
         const ambient = new THREE.AmbientLight(0xffffff, 0.5);
         scene.add(ambient);
         const directional = new THREE.DirectionalLight(0xffffff, 1);
@@ -1064,37 +932,24 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
         const w = window.innerWidth;
         const h = window.innerHeight;
         renderer.setSize(w, h);
-
         const aspect = w / h;
         camera.left = -BASE_HALF_HEIGHT * aspect;
         camera.right = BASE_HALF_HEIGHT * aspect;
         camera.top = BASE_HALF_HEIGHT;
         camera.bottom = -BASE_HALF_HEIGHT;
         camera.updateProjectionMatrix();
-
-        // Adjust velocity scale
         adjustCurrentVelocityScale();
       }
 
-      /* ======================================================
-       8. Main Animation Loop
-    ====================================================== */
       function animate() {
         requestAnimationFrame(animate);
-
         const delta = clock.getDelta();
-
-        if (mixer) mixer.update(delta); // Update animations
-
+        if (mixer) mixer.update(delta);
         if (model) {
-          // Move
           model.position.x += velocity.x;
           model.position.y += velocity.y;
-
-          // Bounce boundary
           const { halfW, halfH } = getCurrentBounceBox();
           let bounced = false;
-
           if (model.position.x > halfW) {
             model.position.x = halfW;
             velocity.x *= -1;
@@ -1104,7 +959,6 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             velocity.x *= -1;
             bounced = true;
           }
-
           if (model.position.y > halfH) {
             model.position.y = halfH;
             velocity.y *= -1;
@@ -1114,72 +968,27 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             velocity.y *= -1;
             bounced = true;
           }
-
-          if (bounced) {
-            onBounce();
-          }
-
-          /* 
-           Removed spin updates to prevent unnecessary rotations that might cause
-           boundary collisions. If you still want the model to spin, consider limiting
-           the spin speed or ensuring it doesn't affect position-based collisions.
-        */
-          /*
-        // Spin (optional, can be removed if not needed)
-        model.rotation.x += spinDirection.x;
-        model.rotation.y += spinDirection.y;
-        model.rotation.z += spinDirection.z;
-        */
+          if (bounced) onBounce();
         }
-
         renderer.render(scene, camera);
       }
 
       function getCurrentBounceBox() {
-        // Define boundaries based on camera view
         const halfH = BASE_HALF_HEIGHT / camera.zoom - MODEL_RADIUS;
         const halfW = halfH * (window.innerWidth / window.innerHeight);
         return { halfW, halfH };
       }
 
-      /* ======================================================
-       9. Bouncing Logic
-    ====================================================== */
       function onBounce() {
-        if (!model) return;
-
-        // Generate new random color
-        const randColor = new THREE.Color(Math.random() * 0xffffff);
-
-        // Store the new color
-        currentModelColor = randColor.clone();
-
-        // // Apply the new color to all mesh materials
-        // model.traverse((child) => {
-        //   if (child.isMesh && child.material) {
-        //     if (Array.isArray(child.material)) {
-        //       // Handle multi-material meshes
-        //       child.material.forEach((mat) => {
-        //         mat.color.copy(currentModelColor);
-        //       });
-        //     } else {
-        //       // Single material mesh
-        //       child.material.color.copy(currentModelColor);
-        //     }
-        //   }
-        // });
-
-        // Play bounce sound if not muted
+        // (Color-change effect removed for clarity)
         playBounceSound();
       }
 
       function playBounceSound() {
         if (muted || !audioCtx || bounceBuffers.length === 0) return;
-
         const index = Math.floor(Math.random() * bounceBuffers.length);
         const buf = bounceBuffers[index];
         if (!buf) return;
-
         const source = audioCtx.createBufferSource();
         source.buffer = buf;
         source.connect(audioCtx.destination);
@@ -1187,10 +996,9 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
 
       /* ======================================================
-       10. Dynamic Elements Management
-    ====================================================== */
+       7. Dynamic Elements Management
+      ====================================================== */
       let dynamicElements = [];
-
       function addDynamicElements(envKey) {
         switch (envKey) {
           case "Action":
@@ -1201,7 +1009,7 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             break;
           case "Scary":
             addScaryShadows();
-            addEerieMist(); // Added mist for more depth
+            addEerieMist();
             break;
           case "Void":
             addShootingStars();
@@ -1210,19 +1018,21 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             break;
         }
       }
-
       function removeDynamicElements() {
         dynamicElements.forEach((el) => el.remove());
         dynamicElements = [];
       }
 
-      /* 10.1 Action: Enhanced Particle Explosion */
       function addActionParticles() {
         const bgAction = document.querySelector(".bg-action");
         if (!bgAction) return;
-
+        // Add an extra fire layer element
+        const fireLayer = document.createElement("div");
+        fireLayer.classList.add("fire-layer");
+        bgAction.appendChild(fireLayer);
+        dynamicElements.push(fireLayer);
+        // Create particles
         for (let i = 0; i < 30; i++) {
-          // Increased number of particles
           const particle = document.createElement("div");
           particle.classList.add("particle");
           particle.style.left = `${Math.random() * 100}%`;
@@ -1240,73 +1050,59 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
           bgAction.appendChild(particle);
           dynamicElements.push(particle);
         }
-
-        // Add Glow Effect
+        // Add glow effect
         const glow = document.createElement("div");
         glow.classList.add("glow");
         bgAction.appendChild(glow);
         dynamicElements.push(glow);
       }
 
-      /* 10.2 Calm: Parallax Clouds */
       function addCalmClouds() {
         const bgCalm = document.querySelector(".bg-calm");
         if (!bgCalm) return;
-
         const clouds = document.createElement("div");
         clouds.classList.add("clouds");
         bgCalm.appendChild(clouds);
         dynamicElements.push(clouds);
       }
 
-      /* 10.3 Scary: Enhanced Shadow Shapes */
       function addScaryShadows() {
         const bgScary = document.querySelector(".bg-scary");
         if (!bgScary) return;
-
         for (let i = 0; i < 8; i++) {
-          // Increased number of shadows
           const shadow = document.createElement("div");
           shadow.classList.add("shadow");
           shadow.style.left = `${Math.random() * 100}%`;
           shadow.style.top = `${Math.random() * 100}%`;
-          shadow.style.animationDuration = `${8 + Math.random() * 12}s`; // Varied animation durations
+          shadow.style.animationDuration = `${8 + Math.random() * 12}s`;
           bgScary.appendChild(shadow);
           dynamicElements.push(shadow);
         }
       }
 
-      /* 10.4 Void: Enhanced Shooting Stars for More Voidish Vibes */
       function addShootingStars() {
         const bgVoid = document.querySelector(".bg-void");
         if (!bgVoid) return;
-
         for (let i = 0; i < 5; i++) {
-          // Increased number for more dynamic effect
           const shootingStar = document.createElement("div");
           shootingStar.classList.add("shooting-star");
           shootingStar.style.left = `${Math.random() * 100}%`;
-          shootingStar.style.animationDelay = `${Math.random() * 15}s`; // Spread out shooting stars
-          shootingStar.style.animationDuration = `7s`; // Consistent duration for realism
+          shootingStar.style.animationDelay = `${Math.random() * 15}s`;
+          shootingStar.style.animationDuration = `7s`;
           bgVoid.appendChild(shootingStar);
           dynamicElements.push(shootingStar);
         }
       }
 
-      /* 10.5 Scary: Add Eerie Mist */
       function addEerieMist() {
         const bgScary = document.querySelector(".bg-scary");
         if (!bgScary) return;
-
         const mist = document.createElement("div");
         mist.classList.add("eerie-mist");
         bgScary.appendChild(mist);
         dynamicElements.push(mist);
       }
 
-      /* ======================================================
-       11. Adjust Velocity Scale on Window Resize
-    ====================================================== */
       function adjustCurrentVelocityScale() {
         const scale = getSpeedScale();
         velocity.set(
@@ -1317,10 +1113,11 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
       }
 
       /* ======================================================
-       12. Initialize with Default Environment
-    ====================================================== */
-      // Add event listener for the new button
+       8. Initialize on DOMContentLoaded
+      ====================================================== */
       document.addEventListener("DOMContentLoaded", () => {
+        // Set a default environment and initialize the change FBX button listener
+        pickEnvironment("Void");
         const changeFbxBtn = document.getElementById("changeFbxBtn");
         if (changeFbxBtn) {
           changeFbxBtn.addEventListener("click", () => {
@@ -1332,10 +1129,6 @@ https://cdn.jsdelivr.net/npm/fflate@0.8.2/umd/index.min.js
             }
           });
         }
-      });
-      document.addEventListener("DOMContentLoaded", () => {
-        // Set a default environment, e.g., "Void"
-        pickEnvironment("Void");
       });
     </script>
   </body>
